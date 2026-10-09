@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="400" viewBox="0 0 320 400" role="img" aria-label="SALLY — UX DESIGNER">
+<defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ff8dae"/><stop offset="1" stop-color="#a53b82"/></linearGradient><linearGradient id="coat" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#c9568f"/><stop offset="1" stop-color="#151f3d"/></linearGradient><linearGradient id="face" x1="0" x2=".9" y1="0" y2="1"><stop stop-color="#ffe0b1"/><stop offset=".64" stop-color="#ecb68d"/><stop offset="1" stop-color="#a96553"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="23"/></filter></defs>
+<rect width="320" height="400" rx="30" fill="#10172e"/><rect x="10" y="10" width="300" height="380" rx="24" fill="url(#bg)" opacity=".26"/>
+<circle cx="160" cy="151" r="116" fill="#ff8dae" opacity=".29" filter="url(#glow)"/><circle cx="160" cy="154" r="111" fill="none" stroke="#ff8dae" stroke-width="3" opacity=".3"/><circle cx="160" cy="154" r="91" fill="none" stroke="#ffffff" stroke-width="1" opacity=".16"/>
+<path d="M42 374q3-105 94-117l46 14q99-6 104 103z" fill="url(#coat)" stroke="#ff8dae" stroke-width="5"/>
+<path d="M130 263l30 48 29-48 23 9-52 83-53-84z" fill="#f2eafc" opacity=".92"/>
+<path d="M130 233h63v48q-31 24-63 0z" fill="#ecb68d"/><path d="M117 182q-9-5-13 6-4 16 14 23zm111-1q11-5 15 7 2 15-17 22z" fill="#ecb68d"/>
+<ellipse cx="173" cy="175" rx="63" ry="83" fill="url(#face)"/>
+<path d='M100 178q-23-78 59-93 87-19 98 96l-23 4-12-43q-38 32-107 34l-8 26z' fill='#563047'/><path d='M102 160q-31 58-6 127l28-20-3-107z' fill='#563047'/><path d='M235 165q26 62 8 121l-22-17-5-106z' fill='#563047'/><path d='M126 133q55-41 104 3' stroke='#a26979' stroke-width='9' opacity='.55'/>
+<path d="M126 177q17-10 30 0M190 177q15-11 29-1" fill="none" stroke="#563047" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="143" cy="190" rx="6" ry="8" fill="#22243a"/><ellipse cx="203" cy="190" rx="6" ry="8" fill="#22243a"/>
+<circle cx="145" cy="188" r="2" fill="white"/><circle cx="205" cy="188" r="2" fill="white"/>
+<path d="M175 192l-5 24h10" fill="none" stroke="#b2745b" stroke-width="3" stroke-linecap="round"/>
+<path d="M153 231q19 16 41-1" fill="none" stroke="#863e50" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="128" cy="212" rx="11" ry="6" fill="#ea8c8c" opacity=".35"/><ellipse cx="216" cy="211" rx="11" ry="6" fill="#ea8c8c" opacity=".35"/>
+<circle cx='118' cy='226' r='5' fill='#ffe9b2'/><circle cx='226' cy='226' r='5' fill='#ffe9b2'/><path d='M215 255l38-28 9 13-38 29z' fill='#ffe29e'/><circle cx='256' cy='230' r='6' fill='#fff5ce'/>
+<path d="M65 344l25-15m141 17 28-14" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".35"/>
+<rect x="22" y="24" width="102" height="29" rx="9" fill="#0c1731" opacity=".85"/><text x="34" y="43" font-family="Arial,sans-serif" font-size="12" fill="#f7f7ff" font-weight="700" letter-spacing="1.5">SALLY</text>
+<circle cx="282" cy="43" r="9" fill="#ff8dae"/><circle cx="282" cy="43" r="4" fill="#fff"/>
+<rect x="22" y="349" width="276" height="31" rx="10" fill="#091426" opacity=".85"/><text x="160" y="369" fill="#e8f7ff" font-size="11" letter-spacing="2" text-anchor="middle" font-family="Arial,sans-serif">UX DESIGNER</text>
+</svg>

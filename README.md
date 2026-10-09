@@ -4,7 +4,7 @@ Videojuego educativo **no oficial** inspirado en BMAD Method. Administra una sta
 
 ## Estado
 
-**Versión inicial jugable** (v0.1): 3 startups, 5 especialistas, 18 misiones narrativas, 8 debates de Party Mode con opciones, 14 conceptos en la academia, recursos, decisiones, guardado automático y resultados. Los debates son escenarios programados, **no** sesiones reales de agentes IA.
+**Versión inicial jugable + actualización visual** (v0.2): 3 startups, 5 especialistas, 18 misiones narrativas, 8 debates de Party Mode con opciones, 14 conceptos en la academia, recursos, decisiones, guardado automático y resultados. El rediseño añade cinco retratos vectoriales originales, portada futurista con oficina ilustrada, tarjetas de personajes, animaciones CSS, paneles de misión, dashboard de startup y sala de Party Mode rediseñada. Los debates son escenarios programados, **no** sesiones reales de agentes IA.
 
 > Es un punto de partida. Los minijuegos independientes, oficina completamente explorable, ilustraciones avanzadas y pruebas E2E siguen pendientes.
 

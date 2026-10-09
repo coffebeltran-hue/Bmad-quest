@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="400" viewBox="0 0 320 400" role="img" aria-label="AMELIA — DEVELOPER">
+<defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffb570"/><stop offset="1" stop-color="#bf544b"/></linearGradient><linearGradient id="coat" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#dd764b"/><stop offset="1" stop-color="#151f3d"/></linearGradient><linearGradient id="face" x1="0" x2=".9" y1="0" y2="1"><stop stop-color="#ffe0b1"/><stop offset=".64" stop-color="#e5a078"/><stop offset="1" stop-color="#a96553"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="23"/></filter></defs>
+<rect width="320" height="400" rx="30" fill="#10172e"/><rect x="10" y="10" width="300" height="380" rx="24" fill="url(#bg)" opacity=".26"/>
+<circle cx="160" cy="151" r="116" fill="#ffb570" opacity=".29" filter="url(#glow)"/><circle cx="160" cy="154" r="111" fill="none" stroke="#ffb570" stroke-width="3" opacity=".3"/><circle cx="160" cy="154" r="91" fill="none" stroke="#ffffff" stroke-width="1" opacity=".16"/>
+<path d="M42 374q3-105 94-117l46 14q99-6 104 103z" fill="url(#coat)" stroke="#ffb570" stroke-width="5"/>
+<path d="M130 263l30 48 29-48 23 9-52 83-53-84z" fill="#f2eafc" opacity=".92"/>
+<path d="M130 233h63v48q-31 24-63 0z" fill="#e5a078"/><path d="M117 182q-9-5-13 6-4 16 14 23zm111-1q11-5 15 7 2 15-17 22z" fill="#e5a078"/>
+<ellipse cx="173" cy="175" rx="63" ry="83" fill="url(#face)"/>
+<path d='M104 177q-20-77 54-88 92-13 96 98l-22-17-16-30q-28 27-111 37z' fill='#2b2040'/><path d='M107 180q-25 53-13 107l19-15 11-98z' fill='#2b2040'/><path d='M226 171q40-5 42-48 37 65-13 88z' fill='#634084'/><path d='M121 119q61-36 111 7' stroke='#8852a4' stroke-width='10' opacity='.5'/>
+<path d="M126 177q17-10 30 0M190 177q15-11 29-1" fill="none" stroke="#2b2040" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="143" cy="190" rx="6" ry="8" fill="#22243a"/><ellipse cx="203" cy="190" rx="6" ry="8" fill="#22243a"/>
+<circle cx="145" cy="188" r="2" fill="white"/><circle cx="205" cy="188" r="2" fill="white"/>
+<path d="M175 192l-5 24h10" fill="none" stroke="#b2745b" stroke-width="3" stroke-linecap="round"/>
+<path d="M153 231q19 16 41-1" fill="none" stroke="#863e50" stroke-width="4" stroke-linecap="round"/>
+<ellipse cx="128" cy="212" rx="11" ry="6" fill="#ea8c8c" opacity=".35"/><ellipse cx="216" cy="211" rx="11" ry="6" fill="#ea8c8c" opacity=".35"/>
+<path d='M102 192q-17-99 75-108 88 0 75 111' stroke='#ffe0ad' stroke-width='10' fill='none'/><rect x='92' y='184' width='24' height='54' rx='11' fill='#f6bc70'/><rect x='238' y='184' width='24' height='54' rx='11' fill='#f6bc70'/><rect x='216' y='253' width='48' height='30' rx='5' fill='#232e4d' stroke='#ffd2a4' stroke-width='3'/><path d='m228 264-5 5 5 5m11-10 5 5-5 5' stroke='#76f9d4' fill='none' stroke-width='3'/>
+<path d="M65 344l25-15m141 17 28-14" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".35"/>
+<rect x="22" y="24" width="102" height="29" rx="9" fill="#0c1731" opacity=".85"/><text x="34" y="43" font-family="Arial,sans-serif" font-size="12" fill="#f7f7ff" font-weight="700" letter-spacing="1.5">AMELIA</text>
+<circle cx="282" cy="43" r="9" fill="#ffb570"/><circle cx="282" cy="43" r="4" fill="#fff"/>
+<rect x="22" y="349" width="276" height="31" rx="10" fill="#091426" opacity=".85"/><text x="160" y="369" fill="#e8f7ff" font-size="11" letter-spacing="2" text-anchor="middle" font-family="Arial,sans-serif">DEVELOPER</text>
+</svg>
