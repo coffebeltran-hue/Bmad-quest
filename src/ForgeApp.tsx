@@ -28,7 +28,6 @@ function Conversation({project,save,missions,debates}:{project:ForgeProject;save
 export default function ForgeApp({project,save,missions,debates,onBack,onEarn}:ForgeProps){
  const [panel,setPanel]=useState<'preview'|'wallet'|'brief'>('preview');
  const [previewKey,setPreviewKey]=useState(0);
- const chapter=Math.min(5,Math.floor(save.index/3));
  const completion=studioPercent(save.index);
  return <section className="forge-studio screen-in">
  <div className="forge-studio-top"><button onClick={onBack}>← Regresar a mi startup</button><span>✦ BMAD APP FORGE / PROYECTO PERSONALIZADO</span></div>
