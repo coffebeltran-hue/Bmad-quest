@@ -16,6 +16,7 @@ export const BUILD_STAGES=[
 ] as const;
 type Script={noun:string;parts:string;features:string;logic:string;test:string;file:string};
 const scripts:Record<ForgeKind,Script>={
+ generated:{noun:'aplicación creada por IA',parts:'estructura propia en index.html',features:'elementos originales para la experiencia del usuario',logic:'JavaScript específico de esta idea, generado por IA',test:'comprobar manualmente las acciones en el navegador aislado',file:'app.js'},
  roulette:{noun:'ruleta europea',parts:'mesa verde, rueda circular numerada y fichas de juego',features:'37 casillas de colores, marcador, apuestas ficticias y botón de giro',logic:'selección de un número aleatorio entre 0 y 36, giros, cálculo de color, paridad y resultados con puntos virtuales',test:'el cero es verde y las fichas virtuales no pueden gastarse por debajo del saldo',file:'src/roulette.ts'},
  blackjack:{noun:'mesa de blackjack',parts:'tapete verde, borde de madera y zona del crupier',features:'cartas, manos y marcador de 21',logic:'baraja, ases de 1 u 11, pedir carta y plantarse',test:'la banca roba hasta 17 y las manos se comparan correctamente',file:'src/blackjack.ts'},
  quiz:{noun:'trivia',parts:'panel del desafío y tarjeta de pregunta',features:'opciones, preguntas y marcador de aciertos',logic:'selección de respuestas y validación de puntos',test:'las respuestas correctas suman puntos y se puede reiniciar',file:'src/ForgeWidgets.tsx'},
@@ -27,6 +28,14 @@ const scripts:Record<ForgeKind,Script>={
 };
 export function buildForgeScript(project:ForgeProject,history:readonly StudioMessage[]=[]):BuildMessage[]{
  const script={...scripts[project.kind]};
+ if(project.kind==='generated'&&project.generated){
+  script.noun=project.title;
+  script.parts='index.html, diseño de '+project.title;
+  script.features=project.generated.features.join(', ')||script.features;
+  script.logic='app.js: eventos, estado e interacciones únicas del proyecto';
+  script.test='probar cada función y revisar el código generado antes de compartirlo';
+  script.file='app.js';
+ }
  const mode=project.blueprint?.mode;
  if(project.kind==='custom'&&mode){
   script.noun=project.title;
@@ -63,7 +72,7 @@ export function buildForgeScript(project:ForgeProject,history:readonly StudioMes
   ],
   [
    ['Mary','Comprobaremos errores y casos especiales. Esta versión no utiliza datos externos ni dinero real.','Comprobar casos',false],
-   ['Winston','Verificamos que '+script.test+'.','Revisar reglas y pruebas',false],
+   ['Winston',project.kind==='generated'?'El código se encuentra aislado. Debes probar sus botones y reglas antes de considerarlo terminado.':'Verificamos que '+script.test+'.','Revisar reglas y pruebas',false],
    ['Amelia','El producto está listo para pasar del modo construcción a la demostración interactiva.','Cerrar pruebas',true]
   ],
   [
@@ -76,7 +85,7 @@ export function buildForgeScript(project:ForgeProject,history:readonly StudioMes
  stages.forEach((messages,stage)=>{
   messages.forEach(([speaker,content,task,isMilestone],i)=>output.push({
    id:'forge-stage-'+stage+'-'+i,speaker,content,stage,task,
-   file:stage===0?'src/forge-engine.ts':stage===4||stage===5?script.file:'src/ForgeWidgets.tsx',
+   file:project.kind==='generated'?(stage<=2?'index.html':stage<=3?'styles.css':'app.js'):(stage===0?'src/forge-engine.ts':stage===4||stage===5?script.file:'src/ForgeWidgets.tsx'),
    isMilestone
   }));
  });

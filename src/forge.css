@@ -313,3 +313,10 @@
 .forge-build-frame.phase-4 .roulette-disclaimer{display:none}
 .forge-build-frame.phase-5 .roulette-history,
 .forge-build-frame.phase-5 .roulette-disclaimer{display:none}
+
+/* The real code generator is the primary path; local presets are explicitly secondary. */
+.forge-ai-code-beta{border:2px solid #a3f4d4;box-shadow:0 0 28px #4be6b523}
+.forge-ai-code-beta>button{width:100%;font-size:13px;min-height:50px;background:linear-gradient(100deg,#9cf9e2,#80d8fd);box-shadow:0 8px 18px #0b1c3655}
+.forge-ai-code-beta .forge-ai-progress{color:#a4f7e5;border-left:3px solid #92dff1;background:#123840;padding:11px;margin-top:14px}
+.forge-local-fallback{display:block;margin:17px auto 5px;border:1px solid #8d8bb2;border-radius:11px;background:#282c50;color:#c5cee5;font-size:12px;padding:12px 20px}
+.forge-local-fallback:disabled{opacity:.4}

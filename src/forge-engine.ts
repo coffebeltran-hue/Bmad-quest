@@ -1,7 +1,8 @@
 import {planUniversal} from './universal-engine.ts';
+import type {GeneratedBundle} from './generated-app.ts';
 import type {UniversalBlueprint} from './universal-engine.ts';
-export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe'|'roulette'|'custom';
-export type ForgeProject = {kind:ForgeKind;prompt:string;title:string;summary:string;mode:'prompt';blueprint?:UniversalBlueprint;source?:'local'|'ai'};
+export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe'|'roulette'|'custom'|'generated';
+export type ForgeProject = {kind:ForgeKind;prompt:string;title:string;summary:string;mode:'prompt';blueprint?:UniversalBlueprint;generated?:GeneratedBundle;source?:'local'|'ai'};
 export type ForgeResult = {project:ForgeProject|null;error:string};
 export const FORGE_START_CREDITS = 250;
 export const FORGE_MISSION_REWARD = 20;
