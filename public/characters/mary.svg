@@ -4,7 +4,9 @@
 <circle cx="160" cy="151" r="116" fill="#8b78ff" opacity=".29" filter="url(#glow)"/><circle cx="160" cy="154" r="111" fill="none" stroke="#8b78ff" stroke-width="3" opacity=".3"/><circle cx="160" cy="154" r="91" fill="none" stroke="#ffffff" stroke-width="1" opacity=".16"/>
 <path d="M42 374q3-105 94-117l46 14q99-6 104 103z" fill="url(#coat)" stroke="#8b78ff" stroke-width="5"/>
 <path d="M130 263l30 48 29-48 23 9-52 83-53-84z" fill="#f2eafc" opacity=".92"/>
-<path d="M130 233h63v48q-31 24-63 0z" fill="#dc956f"/><path d="M117 182q-9-5-13 6-4 16 14 23zm111-1q11-5 15 7 2 15-17 22z" fill="#dc956f"/>
+<path d="M130 233h63v48q-31 24-63 0z" fill="#dc956f"/><!-- Head and facial accessories are optically centered to the backdrop x=160. -->
+<g transform="translate(-13 0)">
+<path d="M117 182q-9-5-13 6-4 16 14 23zm111-1q11-5 15 7 2 15-17 22z" fill="#dc956f"/>
 <ellipse cx="173" cy="175" rx="63" ry="83" fill="url(#face)"/>
 <path d='M99 193Q84 104 165 92Q245 82 242 197L233 220 214 168 191 151Q167 180 105 177Z' fill='#251633'/><path d='M112 145Q157 88 225 140' stroke='#69456b' stroke-width='10' stroke-linecap='round' opacity='.6'/><path d='M106 181q-23 47-13 106l21-20 9-93z' fill='#281733'/>
 <path d="M126 177q17-10 30 0M190 177q15-11 29-1" fill="none" stroke="#251633" stroke-width="4" stroke-linecap="round"/>
@@ -14,6 +16,7 @@
 <path d="M153 231q19 16 41-1" fill="none" stroke="#863e50" stroke-width="4" stroke-linecap="round"/>
 <ellipse cx="128" cy="212" rx="11" ry="6" fill="#ea8c8c" opacity=".35"/><ellipse cx="216" cy="211" rx="11" ry="6" fill="#ea8c8c" opacity=".35"/>
 <path d='M201 247l43 8-8 38-45-8z' fill='#1f2447' stroke='#c7b7ff' stroke-width='4'/><path d='M207 260l27 5' stroke='#65f0db' stroke-width='3'/>
+</g>
 <path d="M65 344l25-15m141 17 28-14" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".35"/>
 <rect x="22" y="24" width="102" height="29" rx="9" fill="#0c1731" opacity=".85"/><text x="34" y="43" font-family="Arial,sans-serif" font-size="12" fill="#f7f7ff" font-weight="700" letter-spacing="1.5">MARY</text>
 <circle cx="282" cy="43" r="9" fill="#8b78ff"/><circle cx="282" cy="43" r="4" fill="#fff"/>

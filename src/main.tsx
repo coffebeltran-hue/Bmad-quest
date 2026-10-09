@@ -2,6 +2,8 @@ import React,{useEffect,useState} from 'react';
 import{createRoot}from'react-dom/client';
 import './style.css';
 import StudioView from './Studio';
+import {agentProfiles} from './agent-profiles';
+import type {AgentName} from './agent-profiles';
 import ForgeApp from './ForgeApp';
 import type {ForgeProject} from './forge-engine';
 import {validateBlueprint} from './universal-engine';
@@ -79,6 +81,7 @@ function App(){
  const [founder,setFounder]=useState('Fundador/a');
  const [startup,setStartup]=useState(0);
  const [showNew,setShowNew]=useState(false);
+ const [selectedAgent,setSelectedAgent]=useState<AgentName|null>(null);
  const [creationMode,setCreationMode]=useState<'preset'|'prompt'>('preset');
  const [prompt,setPrompt]=useState('');
  const [forgeBetaCode,setForgeBetaCode]=useState('');
@@ -95,6 +98,12 @@ function App(){
  const progress=save?Math.round(save.index/missions.length*100):0;
  const currentAgent=mission?.lead==='Todos'?'Mary':mission?.lead||'Mary';
  useEffect(()=>{if(save)localStorage.setItem(key,JSON.stringify(save));else localStorage.removeItem(key)},[save]);
+ useEffect(()=>{
+   if(!selectedAgent)return;
+   function onEscape(event:KeyboardEvent){if(event.key==='Escape')setSelectedAgent(null)}
+   window.addEventListener('keydown',onEscape);
+   return()=>window.removeEventListener('keydown',onEscape);
+ },[selectedAgent]);
  function navigate(to:'home'|'game'|'academy'|'party'|'studio'|'report'){
    setFeedback('');setScreen(to);window.scrollTo({top:0,behavior:'smooth'});
  }
@@ -264,8 +273,37 @@ function App(){
        <button disabled={!save} onClick={()=>navigate('party')} className="feature-card feature-orange"><span className="feature-no">03 / REÚNE AL EQUIPO</span><span className="feature-icon">◎</span><h3>Party Mode</h3><p>Escucha perspectivas diferentes, cuestiona ideas y toma la decisión final.</p><span className="feature-arrow">↗</span></button>
       </div>
     </section>
-    <section className="crew-section"><div className="feature-intro"><div><span className="section-kicker">CONOCE AL SQUAD</span><h2>No estás <em>solo.</em></h2></div><p>Cinco especialistas con talentos diferentes. Elige a quién escuchar… y cuándo.</p></div><div className="crew-grid">{agents.map((a,i)=><div className={'crew-card crew-'+a[3]} key={a[0]}><CharacterArt name={a[0]}/><div className="crew-copy"><span>AGENTE 0{i+1}</span><h3>{a[0]}</h3><small>{a[1]}</small></div></div>)}</div></section>
+    <section className="crew-section"><div className="feature-intro"><div><span className="section-kicker">CONOCE AL SQUAD</span><h2>No estás <em>solo.</em></h2></div><p>Cinco especialistas con talentos diferentes. Elige a quién escuchar… y cuándo.</p></div><div className="crew-grid">{agents.map((a,i)=>{
+      const info=agentProfiles[a[0] as AgentName];
+      return <article className={'crew-card crew-'+a[3]} key={info.name}>
+       <CharacterArt name={info.name}/>
+       <div className="crew-copy">
+        <span>AGENTE 0{i+1}</span>
+        <h3>{info.name}</h3>
+        <small>{info.subtitle}</small>
+        <p className="crew-description">{info.short}</p>
+        <button type="button" className="crew-profile-button" aria-label={'Conocer el perfil de '+info.name} onClick={()=>setSelectedAgent(info.name)}>Conocer perfil <span aria-hidden="true">↗</span></button>
+       </div>
+      </article>;
+     })}</div></section>
     <section className="cta-banner"><span>✦ EL FUTURO ESTÁ EN TUS MANOS</span><h2>¿Listo para crear algo grande?</h2><p>Tu historia empieza con una decisión.</p><button className="btn-main" onClick={()=>setShowNew(true)}>Empezar mi aventura <b>→</b></button></section>
+   </div>}
+   {screen==='home'&&selectedAgent&&<div className="agent-profile-overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setSelectedAgent(null)}}>
+    <section className="agent-profile-dialog screen-in" role="dialog" aria-modal="true" aria-labelledby="agent-profile-heading" aria-describedby="agent-profile-description">
+      <button type="button" className="agent-profile-close" autoFocus aria-label="Cerrar perfil" onClick={()=>setSelectedAgent(null)}>✕</button>
+      <div className="agent-profile-portrait"><CharacterArt name={selectedAgent}/><div className="agent-profile-portrait-caption"><span>✦ CONOCE A TU EQUIPO</span><strong>{agentProfiles[selectedAgent].role}</strong></div></div>
+      <div className="agent-profile-content">
+        <span className="agent-profile-kicker">◈ EQUIPO BMAD · PERFIL DE AGENTE</span>
+        <h2 id="agent-profile-heading">{agentProfiles[selectedAgent].name}<span>.</span></h2>
+        <p className="agent-profile-subtitle">{agentProfiles[selectedAgent].subtitle}</p>
+        <p className="agent-profile-tagline">{agentProfiles[selectedAgent].tagline}</p>
+        <h3>Sobre mí</h3>
+        <p id="agent-profile-description" className="agent-profile-bio">{agentProfiles[selectedAgent].description}</p>
+        <h3>Mis especialidades</h3>
+        <ul className="agent-profile-skills">{agentProfiles[selectedAgent].specialties.map(skill=><li key={skill}>✦ {skill}</li>)}</ul>
+        <div className="agent-profile-mission"><span>MI MISIÓN EN BMAD</span><p>{agentProfiles[selectedAgent].mission}</p></div>
+      </div>
+    </section>
    </div>}
    {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}><section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in forge-start-modal"><button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button><span className="section-kicker">✦ CREA TU PROPIA AVENTURA</span><h2>¿Qué quieres <em>construir?</em></h2><p>Elige un proyecto preparado o describe uno con tus palabras para convertirlo en una app interactiva.</p><label htmlFor="founder">Nombre del fundador</label><input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/><div className="forge-mode-selector"><button className={creationMode==='preset'?'selected':''} onClick={()=>setCreationMode('preset')}><span>◈</span><strong>Proyecto predeterminado</strong><small>3 proyectos · Presupuesto inicial 100 CR</small></button><button className={creationMode==='prompt'?'selected':''} onClick={()=>setCreationMode('prompt')}><span>✦</span><strong>Crear por instrucción</strong><small>Ideas libres · Versión básica funcional · 250 CR</small></button></div>{creationMode==='preset'?<><div className="choose-label">ESCOGE TU STARTUP <span>100 CR INICIALES</span></div><div className="startup-choices">{startups.map((s,i)=><button key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div></>:<><label htmlFor="forge-instruction">Tu instrucción para los agentes</label><textarea id="forge-instruction" className="forge-prompt-field" maxLength={400} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Ejemplo: Quiero una app que me permita jugar blackjack contra un crupier virtual"/><div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Reservas','Necesito una app para reservar citas en una barbería'],['✦ Trivia','Quiero una trivia de preguntas de cultura general']].map(([name,text])=><button key={name} onClick={()=>setPrompt(text)}>{name}</button>)}</div>{prompt.trim().length>0&&<div className={'forge-interpretation '+(analyzedIdea.project?'recognized':'unsupported')}>{analyzedIdea.project?<><strong>✓ Motor encontrado: {analyzedIdea.project.title}</strong><p>{analyzedIdea.project.summary}</p></>:<p>{analyzedIdea.error}</p>}</div>}<small className="forge-model-note">Puedes crear ahora una versión local básica. Con un servidor de IA configurado, también puedes pedirle un plan personalizado; no se ejecuta código generado sin verificar.</small>
  {forgeAPI?<div className="forge-ai-beta">
