@@ -349,3 +349,24 @@
 .forge-refine-history button{background:#35345b;border:1px solid #9089be;color:#d3cbff;border-radius:9px;padding:10px;font-size:11px;font-weight:800}
 .forge-refine-footnote{font-size:10px;color:#9eaec9;line-height:1.65;margin:8px 18px 18px}
 @media(max-width:1060px){.forge-left-column{order:1}.forge-right{order:2}}
+
+/* New-app flow: AI is the primary action; prebuilt templates are opt-in. */
+.forge-start-modal .forge-mode-selector{margin-bottom:18px}
+.forge-start-modal .forge-mode-selector button.selected{border-color:#82f2d9;background:linear-gradient(125deg,#4b397f,#1c6264);box-shadow:inset 0 0 0 1px #a3ffdf35,0 5px 25px #3ddfbe25}
+.forge-creation-explainer{margin:18px 0 0;padding:17px 19px;background:#252d55;border:1px solid #6677a4;border-radius:13px}
+.forge-creation-explainer strong{color:#b6fae6;font:800 13px 'Space Grotesk',sans-serif}
+.forge-creation-explainer p{color:#c5d0e9;font-size:11px;line-height:1.7;margin:7px 0 0}
+.forge-ai-code-beta{margin-top:12px}
+.forge-ai-code-beta .forge-ai-main-submit{font:800 15px 'Space Grotesk',sans-serif;padding:17px 15px;min-height:56px;border:1px solid #e4fff7;background:linear-gradient(105deg,#9bffdf,#87c1ff);color:#102e42;cursor:pointer}
+.forge-ai-code-beta .forge-ai-main-submit:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
+.forge-ai-code-beta .forge-ai-main-submit:disabled{opacity:.6;cursor:wait}
+.forge-ai-code-beta .forge-beta-help{font-size:10px;color:#b8d6e8;margin:8px 0 0}
+.forge-ai-code-beta .forge-ai-prompt-help{font-size:10px;color:#b8d5e2;margin:11px 0 0}
+.forge-local-advanced{margin-top:16px;border:1px solid #48587e;border-radius:12px;background:#17213c;padding:13px}
+.forge-local-advanced summary{cursor:pointer;font-size:11px;font-weight:800;color:#b7c9ef;list-style-position:inside}
+.forge-local-advanced summary:hover{color:#aff8e2}
+.forge-local-advanced p{font-size:11px;color:#aabbd5;line-height:1.65;padding:0 8px}
+.forge-local-advanced .forge-local-fallback{margin:10px auto 0}
+.forge-open-vercel{display:block;margin-top:14px;padding:13px 15px;border-radius:10px;background:#8fead6;color:#112e40!important;text-decoration:none;text-align:center;font-size:13px;font-weight:800}
+.forge-open-vercel:hover{filter:brightness(1.07)}
+@media(max-width:650px){.forge-ai-code-beta .forge-ai-main-submit{font-size:13px}}

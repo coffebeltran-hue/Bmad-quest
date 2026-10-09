@@ -89,7 +89,7 @@ function App(){
  const [startup,setStartup]=useState(0);
  const [showNew,setShowNew]=useState(false);
  const [selectedAgent,setSelectedAgent]=useState<AgentName|null>(null);
- const [creationMode,setCreationMode]=useState<'preset'|'prompt'>('preset');
+ const [creationMode,setCreationMode]=useState<'preset'|'prompt'>('prompt');
  const [prompt,setPrompt]=useState('');
  const [forgeBetaCode,setForgeBetaCode]=useState('');
  const [generatingAI,setGeneratingAI]=useState(false);
@@ -318,19 +318,50 @@ function App(){
       </div>
     </section>
    </div>}
-   {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}><section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in forge-start-modal"><button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button><span className="section-kicker">✦ CREA TU PROPIA AVENTURA</span><h2>¿Qué quieres <em>construir?</em></h2><p>Elige un proyecto preparado o describe uno con tus palabras para convertirlo en una app interactiva.</p><label htmlFor="founder">Nombre del fundador</label><input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/><div className="forge-mode-selector"><button className={creationMode==='preset'?'selected':''} onClick={()=>setCreationMode('preset')}><span>◈</span><strong>Proyecto predeterminado</strong><small>3 proyectos · Presupuesto inicial 100 CR</small></button><button className={creationMode==='prompt'?'selected':''} onClick={()=>setCreationMode('prompt')}><span>✦</span><strong>Crear por instrucción</strong><small>Ideas libres · Versión básica funcional · 250 CR</small></button></div>{creationMode==='preset'?<><div className="choose-label">ESCOGE TU STARTUP <span>100 CR INICIALES</span></div><div className="startup-choices">{startups.map((s,i)=><button key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div></>:<><label htmlFor="forge-instruction">Tu instrucción para los agentes</label><textarea id="forge-instruction" className="forge-prompt-field" maxLength={400} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Ejemplo: Quiero una app que me permita jugar blackjack contra un crupier virtual"/><div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Reservas','Necesito una app para reservar citas en una barbería'],['✦ Trivia','Quiero una trivia de preguntas de cultura general']].map(([name,text])=><button key={name} onClick={()=>setPrompt(text)}>{name}</button>)}</div>{prompt.trim().length>0&&<div className={'forge-interpretation '+(analyzedIdea.project?'recognized':'unsupported')}>{analyzedIdea.project?<><strong>✓ Motor encontrado: {analyzedIdea.project.title}</strong><p>{analyzedIdea.project.summary}</p></>:<p>{analyzedIdea.error}</p>}</div>}<small className="forge-model-note">El botón inferior usa plantillas del juego. Para una app diseñada específicamente desde cero (HTML, CSS y lógica), usa la opción de IA: el código se ejecuta únicamente dentro de una vista aislada.</small>
- {forgeAPI?<div className="forge-ai-beta forge-ai-code-beta">
-  <strong>✦ Crear una aplicación nueva con IA (beta privada)</strong>
-  <p>La IA escribirá el HTML, CSS y JavaScript para tu idea. Se podrá jugar o usar dentro de un navegador aislado. No requiere que la idea coincida con una plantilla. Cada generación utiliza tu saldo de API.</p>
-  <label htmlFor="forge-beta-code">Código de acceso a la beta</label>
-  <input id="forge-beta-code" type="password" value={forgeBetaCode} onChange={e=>setForgeBetaCode(e.target.value)} autoComplete="off" placeholder="Acceso configurado en Vercel"/>
-  <button type="button" disabled={generatingAI||prompt.trim().length<12||!forgeBetaCode.trim()} onClick={createWithAI}>{generatingAI?'La IA está programando tu aplicación…':'✦ Generar aplicación REAL con IA →'}</button>
-  {generatingAI&&<p role="status" className="forge-ai-progress">✦ Los agentes están construyendo código para tu idea. Puede tardar hasta un minuto; espera a que aparezca el resultado.</p>}
-  {aiError&&<p role="alert" className="forge-ai-error">{aiError}</p>}
- </div>:<div className="forge-ai-unavailable">
-  <strong>IA generativa no activada</strong>
-  <p>El constructor local funciona ya. Para habilitar la generación asistida hace falta desplegar la API de Vercel y enlazar su URL.</p>
- </div>}</>}<button className={creationMode==='prompt'?'forge-local-fallback':'btn-main modal-go'} onClick={begin} disabled={creationMode==='prompt'&&!analyzedIdea.project}>{creationMode==='prompt'?'Usar plantilla local sin IA →':'Fundar mi startup →'}</button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
+   {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}>
+ <section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in forge-start-modal">
+  <button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button>
+  <span className="section-kicker">✦ CREA TU PROPIA AVENTURA</span>
+  <h2>¿Qué quieres <em>construir?</em></h2>
+  <p>Describe una idea y pide a la IA que programe una miniaplicación. También puedes elegir un proyecto preparado.</p>
+  <label htmlFor="founder">Nombre del fundador</label>
+  <input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/>
+  <div className="forge-mode-selector" role="group" aria-label="Tipo de nueva aventura">
+   <button type="button" aria-pressed={creationMode==='prompt'} className={creationMode==='prompt'?'selected':''} onClick={()=>{setCreationMode('prompt');setAiError('')}}><span>✦</span><strong>Crear aplicación con IA</strong><small>Instrucción libre · 250 CR · generación de código</small></button>
+   <button type="button" aria-pressed={creationMode==='preset'} className={creationMode==='preset'?'selected':''} onClick={()=>{setCreationMode('preset');setAiError('')}}><span>◈</span><strong>Proyecto predeterminado</strong><small>3 proyectos preparados · 100 CR</small></button>
+  </div>
+  {creationMode==='preset'?<>
+   <div className="choose-label">ESCOGE TU STARTUP <span>100 CR INICIALES</span></div>
+   <div className="startup-choices">{startups.map((s,i)=><button type="button" key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div>
+   <button type="button" className="btn-main modal-go" onClick={begin}>Fundar mi startup →</button>
+  </>:<>
+   <label htmlFor="forge-instruction">Tu instrucción para los agentes</label>
+   <textarea id="forge-instruction" className="forge-prompt-field" maxLength={400} value={prompt} onChange={e=>{setPrompt(e.target.value);setAiError('')}} placeholder="Ejemplo: Quiero una ruleta de casino con animaciones, fichas ficticias y estadísticas"/>
+   <div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Ruleta','Quiero una ruleta con efectos, fichas virtuales y un historial de resultados'],['✦ Plataformas','Quiero un juego de plataformas con un personaje que salte obstáculos']].map(([name,text])=><button type="button" key={name} onClick={()=>{setPrompt(text);setAiError('')}}>{name}</button>)}</div>
+   <div className="forge-creation-explainer"><strong>✦ El modelo escribirá código para tu idea</strong><p>Obtendrás HTML, CSS y JavaScript propios, mostrados en una vista previa aislada. El resultado puede requerir correcciones y cada generación consume saldo de OpenAI API.</p></div>
+   {forgeAPI?<div className="forge-ai-beta forge-ai-code-beta">
+     <label htmlFor="forge-beta-code">Código de acceso a la IA (FORGE_BETA_CODE)</label>
+     <input id="forge-beta-code" type="password" value={forgeBetaCode} onChange={e=>{setForgeBetaCode(e.target.value);setAiError('')}} autoComplete="off" placeholder="Escribe tu código privado de beta"/>
+     <p className="forge-beta-help">No introduzcas aquí tu OPENAI_API_KEY. Esa clave permanece exclusivamente en Vercel.</p>
+     <button type="button" className="forge-ai-main-submit" disabled={generatingAI} onClick={createWithAI}>{generatingAI?'◌ Los agentes están programando…':'✦ Crear mi aplicación con IA →'}</button>
+     {!generatingAI&&(!prompt.trim()||!forgeBetaCode.trim())&&<p className="forge-ai-prompt-help">Para comenzar, escribe una idea y el código de acceso a la beta.</p>}
+     {generatingAI&&<p role="status" className="forge-ai-progress">Generando tu aplicación. Esto puede tardar cerca de un minuto; mantén abierta esta pantalla.</p>}
+     {aiError&&<p role="alert" className="forge-ai-error">{aiError}</p>}
+   </div>:<div className="forge-ai-unavailable" role="status">
+     <strong>Para generar con IA, abre la versión de Vercel</strong>
+     <p>GitHub Pages ejecuta el juego, pero no aloja el generador de código. En la versión de Vercel podrás escribir tu idea y utilizar tu código beta.</p>
+     <a className="forge-open-vercel" href="https://bmad-quest.vercel.app/" target="_blank" rel="noopener noreferrer">Abrir generador con IA en Vercel ↗</a>
+   </div>}
+   <details className="forge-local-advanced">
+     <summary>¿Prefieres una plantilla básica sin IA?</summary>
+     <p>Esta opción utiliza aplicaciones preprogramadas y puede no realizar todo lo que pides. No crea código nuevo ni consume OpenAI API.</p>
+     {prompt.trim().length>0&&<p>{analyzedIdea.project?'Plantilla disponible: '+analyzedIdea.project.title:analyzedIdea.error}</p>}
+     <button type="button" className="forge-local-fallback" onClick={begin} disabled={!analyzedIdea.project}>Usar plantilla local sin IA →</button>
+   </details>
+  </>}
+  {save&&<small className="overwrite-note">Crear una nueva partida reemplaza la partida actual. Tu progreso anterior no se combina con el nuevo proyecto.</small>}
+ </section>
+</div>}
       {save&&screen==='game'&&<div className="screen-in play-screen">
      <div className="game-topline"><span>◈ CENTRO DE OPERACIONES</span><span>PARTIDA GUARDADA AUTOMÁTICAMENTE <i className="signal-dot"/></span></div>
      <div className="game-heading"><div><span className="section-kicker">HOLA, {save.founder.toUpperCase()}</span><h1>Tu startup, <em>tu historia.</em></h1><p>{save.mode==='prompt'&&save.project?save.project.title+' · Construido desde tu instrucción':startups[save.startup][0]+' · '+startups[save.startup][1]}</p></div><div className="level-gem"><span>✦</span><div><small>RANGO ACTUAL</small><b>LEVEL {1+Math.floor(save.index/3)}</b></div></div></div>
