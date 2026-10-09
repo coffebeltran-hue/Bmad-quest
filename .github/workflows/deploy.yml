@@ -20,6 +20,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Test economy
+        run: npm test
       - name: Build
         run: npm run build
       - uses: actions/configure-pages@v5

@@ -1,9 +1,10 @@
 import React,{useEffect,useState} from 'react';
 import{createRoot}from'react-dom/client';
 import './style.css';
+import {applyCreditDelta, canAfford, canRequestFunding, fundEmergency, MISSION_COSTS, PARTY_COSTS} from './economy';
 type Choice={label:string;note:string;delta:[number,number,number]};
 type Mission={title:string;topic:string;lead:string;brief:string;question:string;choices:[Choice,Choice]};
-type Save={startup:number;founder:string;index:number;credits:number;quality:number;insight:number;log:string[];party:number[]};
+type Save={startup:number;founder:string;index:number;credits:number;quality:number;insight:number;log:string[];party:number[];fundingUsed:string[]};
 const startups=[['EduConnect','Plataforma de tutorías','🎓'],['FoodFlow','Pedidos para cafeterías','☕'],['BookEasy','Reservas de servicios','📅']];
 const agents=[['Mary','Analista','MA','violet'],['John','Product Manager','JO','blue'],['Sally','Diseñadora UX','SA','pink'],['Winston','Arquitecto','WI','cyan'],['Amelia','Developer','AM','amber']];
 const chapters=['La idea','El plan','Experiencia UX','Construcción','La crisis','Lanzamiento'];
@@ -38,9 +39,19 @@ const debates=[
 ['Code Review Crew','Amelia: hay casos límite. · Winston: revisemos mantenibilidad y seguridad.'],
 ['Presupuesto crítico','John: prioricemos. · Sally: no sacrifiquemos la tarea principal.']
 ];
-const initial=(startup:number,founder:string):Save=>({startup,founder,index:0,credits:100,quality:35,insight:0,log:[],party:[]});
+const initial=(startup:number,founder:string):Save=>({startup,founder,index:0,credits:100,quality:35,insight:0,log:[],party:[],fundingUsed:[]});
 const key='bmad-quest-save-1';
-function load():Save|null{try{const x=JSON.parse(localStorage.getItem(key)||'null');return x&&Number.isInteger(x.index)&&x.index>=0&&x.index<=18&&Number.isInteger(x.startup)&&x.startup>=0&&x.startup<=2&&Array.isArray(x.log)&&Array.isArray(x.party)?x:null}catch{return null}}
+function load():Save|null {
+ try {
+  const x=JSON.parse(localStorage.getItem(key)||'null');
+  if (!x || !Number.isInteger(x.index) || x.index<0 || x.index>18 ||
+    !Number.isInteger(x.startup) || x.startup<0 || x.startup>2 ||
+    !Number.isFinite(x.credits) || x.credits<0 ||
+    !Number.isFinite(x.quality) || !Number.isFinite(x.insight) ||
+    !Array.isArray(x.log) || !Array.isArray(x.party)) return null;
+  return {...x, fundingUsed:Array.isArray(x.fundingUsed)?x.fundingUsed.filter((id:unknown)=>typeof id==='string'):[]};
+ } catch { return null; }
+}
 
 function CharacterArt({name,variant='portrait'}:{name:string;variant?:'portrait'|'mini'|'tile'}){
  const agent=agents.find(a=>a[0]===name);
@@ -73,20 +84,42 @@ function App(){
  function decide(i:number){
    if(!save||!mission||feedback)return;
    const c=mission.choices[i];
-   setSave({...save,index:save.index+1,credits:Math.max(0,save.credits+c.delta[0]),
-     quality:Math.min(100,Math.max(0,save.quality+c.delta[1])),
-     insight:Math.min(100,save.insight+c.delta[2]),
-     log:[...save.log,mission.title+': '+c.label]});
+   if (!c || applyCreditDelta(save.credits,c.delta[0])===null)return;
+   setSave(current=>{
+     if(!current||current.index!==save.index)return current;
+     const nextCredits=applyCreditDelta(current.credits,c.delta[0]);
+     if(nextCredits===null)return current;
+     return {...current,index:current.index+1,credits:nextCredits,
+       quality:Math.min(100,Math.max(0,current.quality+c.delta[1])),
+       insight:Math.min(100,current.insight+c.delta[2]),
+       log:[...current.log,mission.title+': '+c.label+' ('+(-c.delta[0])+' CR)']};
+   });
    setFeedback(c.note);
  }
  function debate(i:number){
    if(!save||save.party.includes(selectedDebate))return;
    const wins=i===0;
-   setSave({...save,party:[...save.party,selectedDebate],
-     credits:Math.max(0,save.credits+(wins?-2:-8)),
-     insight:Math.min(100,save.insight+(wins?7:2)),
-     quality:Math.min(100,Math.max(0,save.quality+(wins?5:-4))),
-     log:[...save.log,debates[selectedDebate][0]+': '+(wins?'Analizar perspectivas':'Decidir sin analizar')]});
+   const delta=wins?-PARTY_COSTS[0]:-PARTY_COSTS[1];
+   if(applyCreditDelta(save.credits,delta)===null)return;
+   setSave(current=>{
+     if(!current||current.party.includes(selectedDebate))return current;
+     const nextCredits=applyCreditDelta(current.credits,delta);
+     if(nextCredits===null)return current;
+     return {...current,party:[...current.party,selectedDebate],
+       credits:nextCredits,insight:Math.min(100,current.insight+(wins?7:2)),
+       quality:Math.min(100,Math.max(0,current.quality+(wins?5:-4))),
+       log:[...current.log,debates[selectedDebate][0]+': '+(wins?'Analizar perspectivas':'Decidir sin analizar')+' ('+(-delta)+' CR)']};
+   });
+ }
+ function requestFunding(checkpoint:string,minCost:number){
+   setSave(current=>{
+     if(!current)return current;
+     if(checkpoint.startsWith('mission:') && Number(checkpoint.slice(8))!==current.index)return current;
+     if(checkpoint.startsWith('party:') && current.party.includes(Number(checkpoint.slice(6))))return current;
+     const funding=fundEmergency(current,checkpoint,minCost);
+     if(!funding)return current;
+     return {...current,...funding,log:[...current.log,'Financiación de emergencia: +20 CR / -7 calidad ('+checkpoint+')']};
+   });
  }
  const lexicon=[
   ['Agentes','Roles especializados que ayudan a explorar, planificar, diseñar y construir.','Equipo'],
@@ -191,7 +224,7 @@ function App(){
        <article id="mission-panel" className="mission-panel">
         {mission?<><div className="mission-banner"><div><span className="section-kicker">CAPÍTULO {chapter+1} · MISIÓN {save.index+1} DE 18</span><h2>{feedback?'¡Misión superada!':mission.title}</h2><span className="concept-chip">✦ {mission.topic}</span></div><CharacterArt name={currentAgent} variant="mini"/></div>
         <div className="mission-story"><CharacterArt name={currentAgent} variant="mini"/><div><span>{currentAgent.toUpperCase()} · TU MENTOR</span><p>{feedback?feedback:mission.brief}</p></div></div>
-        {feedback?<div className="mission-reward"><div className="reward-star">★</div><div><strong>¡Una decisión más cerca de tu meta!</strong><p>Conocimiento y experiencia desbloqueados. Tu aventura continúa.</p></div><button className="btn-main" onClick={()=>{setFeedback('');if(save.index>=18)navigate('report')}}>{save.index>=18?'Ver mi resultado ↗':'Siguiente misión →'}</button></div>:<><div className="decision-heading">TU PRÓXIMA DECISIÓN</div><h3>{mission.question}</h3><div className="mission-options">{mission.choices.map((c,i)=><button key={c.label} onClick={()=>decide(i)}><span className="option-letter">{String.fromCharCode(65+i)}</span><span>{c.label}</span><b>↗</b></button>)}</div></>}
+        {feedback?<div className="mission-reward"><div className="reward-star">★</div><div><strong>¡Una decisión más cerca de tu meta!</strong><p>Conocimiento y experiencia desbloqueados. Tu aventura continúa.</p></div><button className="btn-main" onClick={()=>{setFeedback('');if(save.index>=18)navigate('report')}}>{save.index>=18?'Ver mi resultado ↗':'Siguiente misión →'}</button></div>:<><div className="decision-heading">TU PRÓXIMA DECISIÓN</div><h3>{mission.question}</h3><div className="mission-options">{mission.choices.map((c,i)=><button key={c.label} onClick={()=>decide(i)} disabled={!canAfford(save.credits,Math.max(0,-c.delta[0]))} title={!canAfford(save.credits,Math.max(0,-c.delta[0]))?'Créditos insuficientes':''}><span className="option-letter">{String.fromCharCode(65+i)}</span><span>{c.label}<small className="decision-price">{Math.max(0,-c.delta[0])} CR {!canAfford(save.credits,Math.max(0,-c.delta[0]))?'· Saldo insuficiente':'· Disponible'}</small></span><b>↗</b></button>)}</div>{mission.choices.every(c=>!canAfford(save.credits,Math.max(0,-c.delta[0])))&&<div className="funding-panel" role="status"><strong>Fondos insuficientes</strong><p>No puedes gastar más créditos de los que tienes. Puedes aceptar un trabajo de emergencia para recuperar 20 CR a cambio de perder 7 puntos de calidad.</p><button className="funding-button" disabled={!canRequestFunding(save.credits,MISSION_COSTS[0],'mission:'+save.index,save.fundingUsed)} onClick={()=>requestFunding('mission:'+save.index,MISSION_COSTS[0])}>Obtener 20 CR · -7 calidad →</button></div>}</>}
         </>:<div className="mission-finish"><span className="section-kicker">✦ OBJETIVO COMPLETADO</span><h2>¡Lanzaste tu startup!</h2><p>Terminaste las 18 misiones. Es hora de conocer los resultados.</p><button className="btn-main" onClick={()=>navigate('report')}>Ver resultados ↗</button></div>}
        </article>
       </div>
@@ -209,7 +242,7 @@ function App(){
        <select aria-label="Elegir escenario de debate" value={selectedDebate} onChange={e=>setSelectedDebate(Number(e.target.value))}>{debates.map((d,i)=><option key={d[0]} value={i}>{d[0]}{save.party.includes(i)?' ✓':''}</option>)}</select>
        <h2>{debates[selectedDebate][0]}</h2>
        <div className="dialogue-scroll">{debates[selectedDebate][1].split(' · ').map((text,i)=>{const [who,...parts]=text.split(':');return <div className="speech" key={i}><CharacterArt name={agents.some(a=>a[0]===who)?who:'Mary'} variant="mini"/><div><strong>{who}</strong><p>{parts.join(':').trim()}</p></div></div>})}</div>
-       {save.party.includes(selectedDebate)?<div className="party-complete"><span>★</span><div><strong>Debate completado</strong><small>La decisión se guardó en el historial de tu startup.</small></div></div>:<div className="party-choices"><strong>¿QUÉ HACES COMO FUNDADOR?</strong><button onClick={()=>debate(0)}><span>01</span> Analizar los argumentos y decidir con evidencia <b>↗</b></button><button onClick={()=>debate(1)}><span>02</span> Decidir rápido sin revisar las objeciones <b>↗</b></button></div>}
+       {save.party.includes(selectedDebate)?<div className="party-complete"><span>★</span><div><strong>Debate completado</strong><small>La decisión se guardó en el historial de tu startup.</small></div></div>:<div className="party-choices"><strong>¿QUÉ HACES COMO FUNDADOR?</strong><button disabled={!canAfford(save.credits,PARTY_COSTS[0])} onClick={()=>debate(0)}><span>01</span> Analizar los argumentos y decidir con evidencia <small>{PARTY_COSTS[0]} CR</small><b>↗</b></button><button disabled={!canAfford(save.credits,PARTY_COSTS[1])} onClick={()=>debate(1)}><span>02</span> Decidir rápido sin revisar las objeciones <small>{PARTY_COSTS[1]} CR</small><b>↗</b></button>{!canAfford(save.credits,PARTY_COSTS[0])&&<div className="funding-panel" role="status"><strong>Sin presupuesto para debatir</strong><p>Obtén 20 CR con una actividad de emergencia. El coste es -7 de calidad.</p><button className="funding-button" disabled={!canRequestFunding(save.credits,PARTY_COSTS[0],'party:'+selectedDebate,save.fundingUsed)} onClick={()=>requestFunding('party:'+selectedDebate,PARTY_COSTS[0])}>Obtener 20 CR · -7 calidad →</button></div>}</div>}
        <p className="sim-note">Simulación educativa con diálogos programados. No utiliza modelos de IA reales.</p>
       </div>
      </div>
