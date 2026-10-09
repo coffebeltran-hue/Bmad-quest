@@ -8,11 +8,14 @@ import ForgeApp from './ForgeApp';
 import type {ForgeProject} from './forge-engine';
 import {validateBlueprint} from './universal-engine';
 import {validateGeneratedBundle} from './generated-app';
+import {applyRevision,undoRevision} from './forge-revisions';
 import {interpretIdea,FORGE_START_CREDITS,FORGE_MISSION_REWARD,FORGE_PARTY_REWARD,claimGig} from './forge-engine';
 import {applyCreditDelta, canAfford, canRequestFunding, fundEmergency, MISSION_COSTS, PARTY_COSTS} from './economy';
 type Choice={label:string;note:string;delta:[number,number,number]};
 type Mission={title:string;topic:string;lead:string;brief:string;question:string;choices:[Choice,Choice]};
-type Save={startup:number;founder:string;index:number;credits:number;quality:number;insight:number;log:string[];party:number[];fundingUsed:string[];mode:'preset'|'prompt';project?:ForgeProject;earned:string[]};
+type ProjectEdit={instruction:string;title:string;at:number};
+type ProjectRevision={instruction:string;previous:ForgeProject};
+type Save={startup:number;founder:string;index:number;credits:number;quality:number;insight:number;log:string[];party:number[];fundingUsed:string[];mode:'preset'|'prompt';project?:ForgeProject;earned:string[];edits:ProjectEdit[];revisions:ProjectRevision[]};
 const startups=[['EduConnect','Plataforma de tutorías','🎓'],['FoodFlow','Pedidos para cafeterías','☕'],['BookEasy','Reservas de servicios','📅']];
 const agents=[['Mary','Analista','MA','violet'],['John','Product Manager','JO','blue'],['Sally','Diseñadora UX','SA','pink'],['Winston','Arquitecto','WI','cyan'],['Amelia','Developer','AM','amber']];
 const chapters=['La idea','El plan','Experiencia UX','Construcción','La crisis','Lanzamiento'];
@@ -47,7 +50,7 @@ const debates=[
 ['Code Review Crew','Amelia: hay casos límite. · Winston: revisemos mantenibilidad y seguridad.'],
 ['Presupuesto crítico','John: prioricemos. · Sally: no sacrifiquemos la tarea principal.']
 ];
-const initial=(startup:number,founder:string):Save=>({startup,founder,index:0,credits:100,quality:35,insight:0,log:[],party:[],fundingUsed:[],mode:'preset',earned:[]});
+const initial=(startup:number,founder:string):Save=>({startup,founder,index:0,credits:100,quality:35,insight:0,log:[],party:[],fundingUsed:[],mode:'preset',earned:[],edits:[],revisions:[]});
 const key='bmad-quest-save-1';
 function load():Save|null {
  try {
@@ -67,7 +70,9 @@ function load():Save|null {
   const blueprint=cached?saved:(x.mode==='prompt'&&saved&&typeof saved.prompt==='string'?interpretIdea(saved.prompt).project:null);
   return {...x,mode:blueprint?'prompt':'preset',project:blueprint||undefined,
     fundingUsed:Array.isArray(x.fundingUsed)?x.fundingUsed.filter((id:unknown)=>typeof id==='string'):[],
-    earned:Array.isArray(x.earned)?x.earned.filter((id:unknown)=>typeof id==='string'):[]};
+    earned:Array.isArray(x.earned)?x.earned.filter((id:unknown)=>typeof id==='string'):[],
+    edits:Array.isArray(x.edits)?x.edits.filter((e:unknown)=>!!e&&typeof (e as ProjectEdit).instruction==='string'&&typeof (e as ProjectEdit).title==='string').slice(-12):[],
+    revisions:Array.isArray(x.revisions)?x.revisions.filter((v:unknown)=>!!v&&typeof (v as ProjectRevision).instruction==='string'&&!!(v as ProjectRevision).previous).slice(-3):[]};
  } catch { return null; }
 }
 
@@ -93,6 +98,7 @@ function App(){
     window.location.hostname.endsWith('.vercel.app')?'/api/forge':''
  );
  const forgeGeneratorAPI=forgeAPI?forgeAPI.replace(/\/forge\/?$/,'/generate'):'';
+ const forgeRefineAPI=forgeAPI?forgeAPI.replace(/\/forge\/?$/,'/refine'):'';
  const [feedback,setFeedback]=useState('');
  const [selectedDebate,setSelectedDebate]=useState(0);
  const [term,setTerm]=useState('');
@@ -151,6 +157,12 @@ function App(){
    }
    setFeedback('');setShowNew(false);
    window.scrollTo({top:0});
+ }
+ function applyForgeRevision(bundle:ForgeProject,instruction:string){
+   setSave(current=>current?.mode==='prompt'?applyRevision(current,bundle,instruction,Date.now()):current);
+ }
+ function restoreForgeRevision(){
+   setSave(current=>current?undoRevision(current,Date.now()):current);
  }
  function earnCredits(gig:string){
    setSave(current=>{
@@ -355,7 +367,7 @@ function App(){
       <aside className="quest-side"><div className="quest-map"><div className="side-heading"><span>MAPA DE LA AVENTURA</span><b>{progress}%</b></div><div className="progress-track"><i style={{width:progress+'%'}}/></div>{chapters.map((title,i)=><div key={title} className={'quest-node '+(i===chapter?'current ':'')+(i<chapter?'complete ':'')+(i>chapter?'locked':'')}><div className="node-index">{i<chapter?'✓':('0'+(i+1))}</div><div><strong>{title}</strong><small>{i<chapter?'Completado':i===chapter?'En progreso':'Por desbloquear'}</small></div>{i===chapter&&<span className="playing-dot"/>}</div>)}</div><div className="party-teaser"><span>◈ PARTY MODE</span><h3>Las mejores ideas se debaten.</h3><p>Reúne a los agentes, escucha argumentos y decide.</p><button onClick={()=>navigate('party')}>Entrar a la sala ↗</button></div></aside>
      </div>
    </div>}
-   {save&&screen==='studio'&&(save.mode==='prompt'&&save.project?<ForgeApp project={save.project} save={save} missions={missions} debates={debates} onBack={()=>navigate('game')} onEarn={earnCredits}/>:<StudioView save={save} missions={missions} debates={debates} onBack={()=>navigate('game')}/>)}
+   {save&&screen==='studio'&&(save.mode==='prompt'&&save.project?<ForgeApp project={save.project} save={save} missions={missions} debates={debates} onBack={()=>navigate('game')} onEarn={earnCredits} refineUrl={forgeRefineAPI} onApplyRevision={applyForgeRevision} onRestoreRevision={restoreForgeRevision}/>:<StudioView save={save} missions={missions} debates={debates} onBack={()=>navigate('game')}/>)}
    {save&&screen==='party'&&<div className="screen-in party-screen"><div className="game-topline"><span>◈ SALA DE REUNIONES</span><span>{save.party.length} / 8 DEBATES TERMINADOS</span></div>
      <div className="game-heading"><div><span className="section-kicker">✦ THINK TOGETHER</span><h1>Welcome to <em>Party Mode.</em></h1><p>Cinco mentes. Distintas perspectivas. La última palabra siempre es tuya.</p></div><button className="btn-ghost" onClick={()=>navigate('game')}>← Volver a la oficina</button></div>
      <div className="party-workspace">
