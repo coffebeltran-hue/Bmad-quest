@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {buildConversation,RELEASES,SITE_VARIANTS,studioPercent,studioStage} from './studio-engine';
 import type {StudioMessage,StudioMission} from './studio-engine';
 import './studio.css';
