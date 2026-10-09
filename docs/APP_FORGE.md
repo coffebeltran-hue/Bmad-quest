@@ -19,3 +19,21 @@ Los motores de interfaz están implementados en `src/ForgeWidgets.tsx`. La lógi
 ## Limitaciones
 
 La generación libre de cualquier juego o software necesitaría un backend para el modelo de IA, sistemas de validación, ejecutores aislados y gestión de recursos. Ninguna de estas capacidades es parte de la versión estática en GitHub Pages. No hay APIs de pagos ni persistencia de registros de terceros.
+
+## Construcción sincronizada de una app por instrucción
+
+Al abrir el estudio de un proyecto creado por instrucción, la app sigue siendo funcional desde el principio. Al pulsar **↺ Recargar y construir**, **▷ Reproducir** o **↻** en el navegador de demostración, comienza una reconstrucción narrativa por siete etapas y 21 acciones:
+
+1. Análisis del prompt y alcance.
+2. Escenario y fondo de la aplicación.
+3. Componentes visuales.
+4. Contenido, textos y controles.
+5. Reglas y lógica local.
+6. Revisión de casos y pruebas.
+7. Entrega del prototipo y habilitación de la interacción.
+
+Los cinco agentes intervienen en los mensajes. La vista derecha muestra un wireframe inicial y luego la interfaz real de la plantilla con componentes progresivamente visibles. Se incluyen controles para pausar, adelantar/retroceder, reiniciar, ajustar velocidad y volver a la aplicación completa. El historial de misiones y decisiones existentes aparece después del recorrido básico.
+
+La reproducción **no modifica partidas guardadas ni saldos**, y mientras aún se está mostrando cómo se construye, los controles del producto no están disponibles. Al llegar al final o salir de la reproducción, se restaura la app interactiva completa.
+
+**Exactitud de la simulación:** los nombres de archivos reflejan archivos reales del proyecto, pero no son escrituras de código en tiempo real; las plantillas funcionales ya están implementadas en el repositorio. Para un constructor por IA autónomo sería necesario un servicio generativo externo y un entorno de ejecución aislado.
