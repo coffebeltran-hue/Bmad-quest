@@ -278,3 +278,14 @@
  .forge-skeleton-top{animation:none!important}
  .forge-build-track i{transition:none!important}
 }
+
+/* Universal app: progressively show actual widgets as the team assembles them. */
+.forge-build-frame.phase-1 .universal-runtime > :not(.uni-cover){display:none}
+.forge-build-frame.phase-2 .universal-runtime > :not(.uni-cover):not(.uni-header){display:none}
+.forge-build-frame.phase-3 .universal-runtime > :not(.uni-cover):not(.uni-header):not(.uni-stats):not(.uni-forms):not(.uni-calculator):not(.uni-timer):not(.uni-game){display:none}
+.forge-build-frame.phase-3 .uni-forms form,.forge-build-frame.phase-3 .uni-calculator-inputs,.forge-build-frame.phase-3 .uni-timer-face,.forge-build-frame.phase-3 .uni-game-options{opacity:.25}
+.forge-build-frame.phase-4 .uni-list,.forge-build-frame.phase-4 .uni-results,.forge-build-frame.phase-4 .uni-flash{display:none}
+.forge-build-frame.phase-5 .universal-runtime{box-shadow:inset 0 0 24px #8cdbd244}
+.forge-build-frame.phase-6 .universal-runtime{animation:uniLaunch .4s ease both}
+@keyframes uniLaunch{from{opacity:.7;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.forge-build-frame.phase-6 .universal-runtime{animation:none!important}}

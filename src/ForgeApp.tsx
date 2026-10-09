@@ -6,6 +6,8 @@ import type {StudioMission} from './studio-engine';
 import {buildForgeScript,BUILD_STAGES,forgeFrame} from './forge-replay';
 import type {BuildMessage} from './forge-replay';
 import {BlackjackGame,QuizGame,TasksApp,TicTacToeGame,BookingApp,ShopApp} from './ForgeWidgets';
+import UniversalApp from './UniversalApp';
+import {planUniversal} from './universal-engine';
 import './forge.css';
 type ForgeSave={index:number;credits:number;quality:number;insight:number;founder:string;log:string[];earned:string[]};
 type ForgeProps={project:ForgeProject;save:ForgeSave;missions:readonly StudioMission[];debates:readonly (readonly string[])[];onBack:()=>void;onEarn:(gig:string)=>void};
@@ -79,12 +81,13 @@ export default function ForgeApp({project,save,missions,debates,onBack,onEarn}:F
     {project.kind==='tictactoe'&&<TicTacToeGame/>}
     {project.kind==='booking'&&<BookingApp title={project.title}/>}
     {project.kind==='shop'&&<ShopApp title={project.title}/>}
+    {project.kind==='custom'&&<UniversalApp blueprint={project.blueprint||planUniversal(project.prompt)} disabled={buildStage<6}/>}
    </div>}
   </div>
   {replayActive&&<div className="forge-replay-caption"><span>✦ {BUILD_STAGES[buildStage].description}</span><p>La vista evoluciona con las conversaciones. Los controles se habilitan cuando Amelia completa la entrega.</p>{buildStage===6&&<button onClick={finishReplay}>Probar la app completa ↗</button>}</div>}
  </>}
  {panel==='wallet'&&<div className="forge-wallet"><div className="forge-wallet-hero"><span>◎ LABORATORIO DE INGRESOS</span><h2>Tu talento vale créditos.</h2><p>Los encargos son gratuitos. Obtienes recompensas una vez por capítulo; al completar tres misiones se renuevan.</p><strong>{save.credits} CR DISPONIBLES</strong></div><div className="forge-gigs">{GIGS.map(g=>{const available=canClaimGig('prompt',save.index,g.id,save.earned);return <div className="forge-gig" key={g.id}><span>{g.icon}</span><div><strong>{g.title}</strong><p>{g.detail}</p><small>+{g.pay} CR</small></div><button disabled={!available} onClick={()=>onEarn(g.id)}>{available?'Completar →':'Cobrado ✓'}</button></div>})}</div><p className="forge-wallet-tip">También ganas +20 CR por misión completada y +12 CR por debate en Party Mode, solo en este modo.</p></div>}
- {panel==='brief'&&<div className="forge-plan"><span>✦ PRODUCT BRIEF</span><h2>{project.title}</h2><blockquote>{project.prompt}</blockquote><div className="forge-plan-grid"><div><b>Motor elegido</b><span>{project.kind}</span></div><div><b>Versión visual</b><span>{RELEASES[studioStage(save.index)].name}</span></div><div><b>Estado</b><span>Plantilla funcional</span></div><div><b>Origen</b><span>Instrucción del usuario</span></div></div><p>{project.summary}</p><div className="forge-plan-warning">El intérprete funciona con categorías reconocidas y plantillas implementadas. No utiliza IA generativa ni crea cualquier software fuera de ellas.</div></div>}
+ {panel==='brief'&&<div className="forge-plan"><span>✦ PRODUCT BRIEF</span><h2>{project.title}</h2><blockquote>{project.prompt}</blockquote><div className="forge-plan-grid"><div><b>Motor elegido</b><span>{project.kind}</span></div><div><b>Versión visual</b><span>{RELEASES[studioStage(save.index)].name}</span></div><div><b>Estado</b><span>Plantilla funcional</span></div><div><b>Origen</b><span>Instrucción del usuario</span></div></div><p>{project.summary}</p><div className="forge-plan-warning">El constructor interpreta ideas generales y crea herramientas locales funcionales. Las funcionalidades avanzadas no se generan automáticamente; no utiliza un modelo de IA conectado.</div></div>}
  </div><div className="forge-preview-bottom"><span className="forge-glow-dot"/> MOTOR {project.kind.toUpperCase()} ACTIVO <span>Sin datos enviados al exterior</span></div></div></div>
  <div className="forge-callout"><span>✦ SIGUIENTE ETAPA</span><p>Completa misiones y debates para ganar experiencia y créditos. Puedes jugar o usar tu aplicación de demostración desde ahora, sin gastar créditos BMAD dentro de ella.</p><button onClick={onBack}>Volver a las misiones →</button></div>
  </section>;

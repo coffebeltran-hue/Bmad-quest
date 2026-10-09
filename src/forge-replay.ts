@@ -21,10 +21,19 @@ const scripts:Record<ForgeKind,Script>={
  tasks:{noun:'gestor de tareas',parts:'espacio de productividad y encabezado',features:'campo para tareas, filtros y lista',logic:'añadir, marcar, priorizar y borrar elementos',test:'los filtros muestran las tareas correctas sin perder datos',file:'src/ForgeWidgets.tsx'},
  booking:{noun:'agenda de reservas',parts:'formulario y cuadrícula de horarios',features:'servicios, fechas y espacios disponibles',logic:'selección de hora y confirmación de reserva simulada',test:'una hora reservada aparece bloqueada en la demostración',file:'src/ForgeWidgets.tsx'},
  shop:{noun:'tienda virtual',parts:'vitrina de productos y portada',features:'tarjetas, buscador y precios',logic:'filtrado, selección y carrito de demostración',test:'el total suma productos y la confirmación vacía el carrito',file:'src/ForgeWidgets.tsx'},
- tictactoe:{noun:'juego de tres en raya',parts:'tablero de nueve casillas y panel arcade',features:'símbolos X/O y estado de partida',logic:'turnos, detección de victoria y rival automático',test:'no se permite jugar después de ganar y se puede reiniciar',file:'src/ForgeWidgets.tsx'}
+ tictactoe:{noun:'juego de tres en raya',parts:'tablero de nueve casillas y panel arcade',features:'símbolos X/O y estado de partida',logic:'turnos, detección de victoria y rival automático',test:'no se permite jugar después de ganar y se puede reiniciar',file:'src/ForgeWidgets.tsx'},
+ custom:{noun:'prototipo configurable',parts:'portada, navegación y áreas de interacción',features:'formularios, registros y herramientas derivadas de la instrucción',logic:'guardar, consultar y modificar datos dentro del navegador',test:'las acciones básicas se ejecutan sin requerir un servidor externo',file:'src/UniversalApp.tsx'}
 };
 export function buildForgeScript(project:ForgeProject,history:readonly StudioMessage[]=[]):BuildMessage[]{
- const script=scripts[project.kind];
+ const script={...scripts[project.kind]};
+ const mode=project.blueprint?.mode;
+ if(project.kind==='custom'&&mode){
+  script.noun=project.title;
+  script.parts='identidad y distribución de una app de '+mode;
+  script.features=project.blueprint?.capabilities.slice(0,3).join(', ')||script.features;
+  script.logic='interacciones seguras para una aplicación de tipo '+mode;
+  script.test='sus controles básicos cumplen la función '+project.blueprint?.action;
+ }
  const stages: (readonly [BuilderAgent,string,string,boolean])[][]=[
   [
    ['Mary','He leído tu idea: «'+project.prompt+'». Primero debemos entender qué experiencia quieres construir.','Analizar la instrucción',false],

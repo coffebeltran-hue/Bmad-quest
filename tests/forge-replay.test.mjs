@@ -40,3 +40,13 @@ test('replaying never changes the stored mission decisions',()=>{
  assert.equal(JSON.stringify({log,history}),s);
  assert.equal(messages[messages.length-1].id,'history-m-0-choice');
 });
+
+test('a custom instruction also receives a full synchronized build transcript',()=>{
+ const project=interpretIdea('Quiero una app para registrar las visitas al veterinario de mis mascotas').project;
+ assert.ok(project);
+ assert.equal(project.kind,'custom');
+ const messages=buildForgeScript(project);
+ assert.equal(messages.length,21);
+ assert.equal(forgeFrame(messages,21).complete,true);
+ assert.ok(messages.some(m=>m.content.includes(project.title)));
+});

@@ -1,5 +1,7 @@
-export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe';
-export type ForgeProject = {kind:ForgeKind;prompt:string;title:string;summary:string;mode:'prompt'};
+import {planUniversal} from './universal-engine';
+import type {UniversalBlueprint} from './universal-engine';
+export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe'|'custom';
+export type ForgeProject = {kind:ForgeKind;prompt:string;title:string;summary:string;mode:'prompt';blueprint?:UniversalBlueprint;source?:'local'|'ai'};
 export type ForgeResult = {project:ForgeProject|null;error:string};
 export const FORGE_START_CREDITS = 250;
 export const FORGE_MISSION_REWARD = 20;
@@ -23,7 +25,10 @@ export function interpretIdea(value:string):ForgeResult {
  if(prompt.length<12)return {project:null,error:'Describe tu idea en una frase un poco más detallada.'};
  if(dangerous.test(prompt))return {project:null,error:'Esa idea no se puede crear en este estudio.'};
  const match=recognizers.find(r=>r.pattern.test(prompt));
- if(!match)return {project:null,error:'Todavía no tengo un motor funcional para esa idea. Por ahora puedo crear blackjack, triqui, trivia, tareas, reservas o tiendas. Prueba describirla como uno de esos tipos; no generaré una app que solo aparente funcionar.'};
+ if(!match){
+  const blueprint=planUniversal(prompt);
+  return {project:{kind:'custom',prompt,title:blueprint.title,summary:'Prototipo funcional básico adaptado a tu idea. '+blueprint.caveat,mode:'prompt',blueprint,source:'local'},error:''};
+ }
  return {project:{kind:match.kind,prompt,title:match.title,summary:match.summary,mode:'prompt'},error:''};
 }
 export function gigKey(chapter:number,id:string){return 'gig:'+chapter+':'+id}

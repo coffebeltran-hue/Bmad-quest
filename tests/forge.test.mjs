@@ -9,7 +9,7 @@ test('blackjack descriptions become an actual playable blueprint',()=>{
   assert.equal(out.project?.mode,'prompt');
  }
 });
-test('supports different genuine app templates and declines unsupported prompts',()=>{
+test('supports existing app templates and accepts broader instructions as safe prototypes',()=>{
  const examples=[
   ['Hazme un juego de tres en raya contra la computadora','tictactoe'],
   ['Necesito una trivia de preguntas de ciencias','quiz'],
@@ -18,7 +18,7 @@ test('supports different genuine app templates and declines unsupported prompts'
   ['Quiero una tienda online con productos y carrito','shop']
  ];
  for(const [q,kind] of examples)assert.equal(interpretIdea(q).project?.kind,kind);
- assert.equal(interpretIdea('Haz una plataforma de inteligencia artificial que controle robots').project,null);
+ assert.equal(interpretIdea('Haz una plataforma de inteligencia artificial que controle robots').project?.kind,'custom');
  assert.equal(interpretIdea('hola').project,null);
  assert.equal(interpretIdea('Quiero hackear contraseñas con phishing').project,null);
 });
@@ -34,4 +34,19 @@ test('prompt credit economy is independent from preset starting budget',()=>{
  const next=claimGig(won.credits,'prompt',3,'research',won.earned);
  assert.ok(next);
  assert.equal(next.credits,320);
+});
+
+test('custom prompts create individualized functional plans instead of rejecting the idea',()=>{
+ const goals=[
+  'Necesito una aplicación para anotar las vacunas de mis mascotas',
+  'Quiero una aplicación para controlar mi cronómetro de estudio',
+  'Diseña una calculadora de descuentos para mi tienda',
+  'Necesito llevar una bitácora de mis viajes',
+  'Quiero un panel de estadísticas para mis ejercicios'
+ ];
+ const output=goals.map(x=>interpretIdea(x).project);
+ assert.ok(output.every(x=>x?.mode==='prompt'));
+ assert.ok(output.every(x=>x?.blueprint?.capabilities.length));
+ assert.equal(output[0]?.kind,'custom');
+ assert.notEqual(output[0]?.title,output[1]?.title);
 });
