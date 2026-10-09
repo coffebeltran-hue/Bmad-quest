@@ -1,0 +1,179 @@
+/* BMAD App Forge: an arcade workshop and accessible functional local demo */
+.forge-start-modal{width:min(800px,100%)}
+.forge-mode-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:23px}
+.forge-mode-selector button{background:#1e2849;color:#ecedff;border:1px solid #465888;border-radius:17px;text-align:left;padding:17px;display:flex;flex-direction:column;gap:5px}
+.forge-mode-selector button.selected{background:linear-gradient(125deg,#423777,#19505b);border-color:#8ae8e0;box-shadow:inset 0 0 0 1px #8ae8e044}
+.forge-mode-selector button>span{font-size:25px;color:#94e9e1}
+.forge-mode-selector strong{font-size:13px}.forge-mode-selector small{font-size:11px;color:#b9c2db}
+.forge-prompt-field{width:100%;min-height:115px;background:#101c38;color:#fff;border:1px solid #67729b;resize:vertical;border-radius:14px;padding:16px;line-height:1.6}
+.forge-prompt-examples{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:13px 0}
+.forge-prompt-examples span{font-size:10px;font-weight:800;color:#aeb9d5}
+.forge-prompt-examples button{border:1px solid #515986;background:#292e56;border-radius:10px;color:#e7ebff;padding:9px 12px;font-size:11px;font-weight:700}
+.forge-prompt-examples button:hover{border-color:#7fdfdd}
+.forge-interpretation{border:1px solid #6a8d7d;background:#1d4246;padding:13px 16px;border-radius:12px;margin:17px 0;color:#d1fff3}
+.forge-interpretation.unsupported{background:#403347;border-color:#b48a78;color:#f6d2bd}
+.forge-interpretation strong{font-size:12px}.forge-interpretation p{font-size:11px;margin:7px 0 0;line-height:1.6;color:inherit}
+.forge-model-note{display:block;font-size:10px;color:#acb7d2;line-height:1.6;margin-top:14px}
+.forge-game-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:13px;border:1px solid #7669bb;background:linear-gradient(105deg,#352c64,#1a5257);border-radius:15px;padding:17px 20px;margin-bottom:21px}
+.forge-game-banner span{color:#8ff0e1;font-size:10px;font-weight:800;letter-spacing:1px}
+.forge-game-banner strong{color:#e9f0ff;font-size:12px}
+.forge-game-banner button{border:0;background:#9bdbdb;color:#18273c;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:800}
+.forge-studio{padding:30px 0 75px}
+.forge-studio-top{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#8bded7;font-size:10px;font-weight:800;letter-spacing:1.6px}
+.forge-studio-top button{background:#202a4d;color:#dde5ff;border:1px solid #59618b;border-radius:11px;padding:12px 15px;font-size:12px;font-weight:800;letter-spacing:0}
+.forge-studio-intro{display:flex;justify-content:space-between;align-items:center;gap:30px;padding:36px 0 28px}
+.forge-studio-intro h1{font:800 clamp(2.6rem,4.8vw,4.5rem)/1.1 'Space Grotesk';letter-spacing:-2.5px;margin:10px 0 12px}
+.forge-studio-intro h1 em{font-style:normal;color:#9f91f6}
+.forge-studio-intro p{color:#adbadd;line-height:1.7;font-size:14px;max-width:660px}
+.forge-kicker{color:#8fe7dc;font-size:11px;font-weight:800;letter-spacing:2px}
+.forge-studio-metrics{display:flex;gap:10px;flex:none}
+.forge-studio-metrics>div{display:flex;flex-direction:column;gap:8px;padding:21px;background:#222752;border:1px solid #59638c;border-radius:15px;min-width:140px}
+.forge-studio-metrics>div>span{color:#91a5c4;font-size:9px;font-weight:800;letter-spacing:1px}
+.forge-studio-metrics strong{font:800 32px 'Space Grotesk';color:#f2f2ff}
+.forge-studio-metrics small{font-size:11px;color:#86e9e0}
+.forge-flow{display:flex;align-items:center;gap:14px;border:1px solid #404d79;border-radius:16px;padding:16px 22px;background:#1b2645;margin-bottom:21px}
+.forge-flow .forge-step{color:#9caad0;font-size:10px;font-weight:800;letter-spacing:1px}
+.forge-flow .forge-step.done{color:#78e6d6}.forge-flow .forge-step.active{color:#ecd3a8}
+.forge-flow i{flex:1;height:1px;background:#4a6186}
+.forge-workspace{display:grid;grid-template-columns:minmax(270px,.78fr) minmax(0,1.45fr);gap:18px;align-items:start}
+.forge-chat,.forge-browser-shell{border:1px solid #48557e;border-radius:22px;overflow:hidden;background:#171e3a;box-shadow:0 25px 50px #0005}
+.forge-panel-title{display:flex;align-items:center;gap:12px;min-height:78px;background:#24294e;padding:17px}
+.forge-panel-symbol{width:43px;height:43px;display:grid;place-items:center;font-size:25px;background:#45336f;color:#b5a0f8;border-radius:13px}
+.forge-panel-title strong{font-size:13px}.forge-panel-title small{display:block;font-size:10px;color:#a3b4d3;margin-top:5px}
+.forge-online{color:#7fe8cf;margin-left:auto;font-size:9px;font-weight:800}
+.forge-chat-actions{display:flex;justify-content:space-around;gap:6px;padding:12px;background:#192445;border-bottom:1px solid #3f4971}
+.forge-chat-actions button{border:1px solid #4c5a87;border-radius:9px;background:#29365c;color:#d7e4fd;font-size:10px;font-weight:800;padding:9px}
+.forge-chat-actions button:hover{background:#384672}
+.forge-chat-messages{height:590px;overflow:auto;padding:18px 14px}
+.forge-chat-line{display:flex;gap:10px;margin-bottom:17px;align-items:flex-start}
+.forge-chat-line img,.forge-self{height:49px;width:42px;border:1px solid #7180b5;object-fit:cover;border-radius:11px;flex:none}
+.forge-self{background:#6557a5;display:grid;place-items:center;font-size:11px;font-weight:800}
+.forge-chat-line strong{font-size:11px;color:#bdaafa}
+.forge-chat-line p{border:1px solid #46537b;background:#293351;border-radius:4px 14px 14px;padding:12px;margin:6px 0 0;color:#d1daf0;font-size:11px;line-height:1.65}
+.forge-chat-line.active p{border-color:#82eedf;box-shadow:0 0 16px #6ae0e127}
+.forge-chat-caption{border-top:1px solid #46537b;padding:14px 17px;font-size:10px;line-height:1.5;color:#a4b0d0}
+.forge-right{min-width:0}
+.forge-browser-title{display:flex;align-items:center;gap:12px;min-height:48px;padding:11px 16px;color:#e6eaff;font-size:12px;font-weight:800;background:#262b52}
+.browser-leds{display:flex;gap:5px}.browser-leds i{width:9px;height:9px;border-radius:50%;background:#f67883}.browser-leds i:nth-child(2){background:#ffce76}.browser-leds i:nth-child(3){background:#70eac4}
+.forge-browser-title span{flex:1}.forge-browser-title button{border:1px solid #607399;background:#283d5a;color:#8af0e6;border-radius:7px;font-size:19px;padding:4px 10px}
+.forge-address{background:#121a36;color:#99abd2;padding:12px 17px;text-align:center;font:11px monospace;border-bottom:1px solid #424a71;word-break:break-all}
+.forge-tabbar{display:flex;background:#1e2b4a;padding:9px;gap:7px}
+.forge-tabbar button{flex:1;padding:11px 4px;border:0;background:transparent;color:#98a5c9;font-size:11px;font-weight:800;border-radius:9px}
+.forge-tabbar button.active{background:#454078;color:white;box-shadow:inset 0 1px #fff3}
+.forge-preview{min-height:530px;background:#e9ebf4;color:#1c2a42}
+.forge-preview-bottom{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 18px;background:#161e3b;border-top:1px solid #465272;font-size:10px;letter-spacing:1px;color:#82f2d8;font-weight:800}
+.forge-preview-bottom span:last-child{font-size:10px;color:#7f92b6;letter-spacing:0;font-weight:400}
+.forge-glow-dot{display:inline-block;height:8px;width:8px;background:#76ebcb;box-shadow:0 0 13px #76ebcb;border-radius:50%}
+.forge-wallet,.forge-plan{min-height:500px;padding:24px;background:#1d254a}
+.forge-wallet-hero{background:linear-gradient(120deg,#484078,#24545f);padding:27px;border-radius:16px;border:1px solid #607aa9}
+.forge-wallet-hero>span,.forge-plan>span{color:#8af2d8;font-size:10px;letter-spacing:1.5px;font-weight:800}
+.forge-wallet-hero h2,.forge-plan h2{font:800 29px 'Space Grotesk';margin:14px 0}
+.forge-wallet-hero p,.forge-plan p{color:#b7c8e0;font-size:12px;line-height:1.7}
+.forge-wallet-hero strong{display:block;color:#c1fff3;margin-top:16px;font-size:12px}
+.forge-gigs{display:grid;gap:12px;margin-top:20px}
+.forge-gig{display:flex;align-items:center;gap:13px;border:1px solid #536088;background:#293158;border-radius:14px;padding:14px}
+.forge-gig>span{display:grid;place-items:center;height:45px;width:45px;background:#47417d;border-radius:12px;color:#c9b3ff;font-size:25px;flex:none}
+.forge-gig>div{flex:1}.forge-gig strong{font-size:13px}.forge-gig p{font-size:10px;color:#aabbd4;margin:5px 0}.forge-gig small{color:#8ef3dc;font-weight:800}
+.forge-gig button{border:0;border-radius:9px;background:#83e6d9;color:#15293b;font-weight:800;font-size:10px;padding:11px}
+.forge-gig button:disabled{background:#424966;color:#9cacc5}
+.forge-wallet-tip{font-size:11px;color:#acb9d6;line-height:1.65}
+.forge-plan blockquote{margin:15px 0 28px;border-left:3px solid #a093ec;padding:12px 16px;background:#272a50;color:#d7caff;font-size:13px;line-height:1.65}
+.forge-plan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.forge-plan-grid div{padding:17px;background:#292f55;border:1px solid #525b84;border-radius:12px}
+.forge-plan-grid b,.forge-plan-grid span{display:block;font-size:11px}
+.forge-plan-grid b{color:#8ae9dd}.forge-plan-grid span{margin-top:8px;color:#e4e6fa}
+.forge-plan-warning{font-size:11px;line-height:1.65;color:#f2d4b4;background:#403344;border:1px solid #976e7e;padding:13px;border-radius:12px}
+.forge-callout{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:13px;margin-top:22px;border:1px solid #655e99;background:#27264b;padding:20px;border-radius:15px}
+.forge-callout>span{color:#a3f2e1;font-size:10px;font-weight:800}.forge-callout p{font-size:11px;line-height:1.6;color:#bcc3db;max-width:580px}.forge-callout button{border:0;background:#b7a4f7;color:#1d173d;border-radius:10px;padding:12px 15px;font-size:11px;font-weight:800}
+/* Casino table — fictional chips, original artwork, no monetary stakes */
+.casino-shell{background:radial-gradient(ellipse at 50% 0%,#183d3c,#0b171c 80%);min-height:600px;padding-bottom:17px}
+.casino-top{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:16px 22px;background:linear-gradient(110deg,#112e32,#11262b);border-bottom:2px solid #b28a52}
+.casino-top>div:first-child{display:flex;flex-direction:column;gap:3px}
+.casino-live{font-size:9px;letter-spacing:1.1px;color:#8af9b6;font-weight:800}
+.casino-top strong{font:800 clamp(17px,2.3vw,24px) 'Space Grotesk';color:#f3e3ba;letter-spacing:1px}
+.casino-top strong em{font-style:normal;color:#8af0c2}
+.casino-top small{font-size:9px;color:#8ba9a0;letter-spacing:1px}
+.casino-score{color:#fce8c2;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.casino-score span{color:#a2c9bc;font-size:10px;font-weight:800}.casino-score b{font:800 24px 'Space Grotesk'}.casino-score small{font-size:10px;color:#b9e5c4}
+.casino-table{padding:12px;background:linear-gradient(130deg,#6b361b,#d8a15a 20%,#613116 60%,#b4773a);box-shadow:inset 0 0 20px #271300}
+.wood-rim{padding:11px;background:linear-gradient(145deg,#5b2c17,#e2b27b 42%,#623a1d);border-radius:11px 11px 47% 47%/11px 11px 20% 20%;border:2px solid #e9ba79;box-shadow:0 10px 20px #0008,inset 0 1px 4px #e2bb87}
+.felt{min-height:388px;border-radius:9px 9px 48% 48%/9px 9px 21% 21%;background:radial-gradient(ellipse at 50% 28%,#24844a,#096035 53%,#08492b 85%);border:4px solid #bdab80;position:relative;overflow:hidden;box-shadow:inset 0 0 75px #042a18}
+.felt-lines{position:absolute;inset:0;background:repeating-radial-gradient(ellipse at 50% 80%,transparent 0 46px,#bbf0bf08 47px,#bbf0bf06 49px);pointer-events:none}
+.table-halo{position:absolute;top:53%;left:50%;transform:translate(-50%,-50%);width:77%;height:62%;border:2px solid #d2c79365;border-radius:50%;pointer-events:none}
+.arc-line{position:absolute;top:48%;left:14%;width:72%;height:40%;border-bottom:2px solid #f5dda75e;border-radius:50%;pointer-events:none}
+.dealer-position,.player-position{position:absolute;top:11px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;white-space:nowrap;z-index:2}
+.player-position{top:auto;bottom:116px}
+.hand-tag{color:#f5e5b5;border:1px solid #d4b58361;background:#0d4b32a9;border-radius:7px;padding:6px 11px;font-size:9px;font-weight:800;letter-spacing:1px}
+.hand-value{background:#143b2a;border:1px solid #dbd4ae;border-radius:8px;min-width:30px;text-align:center;padding:5px;color:#fff8c9;font:800 12px 'Space Grotesk'}
+.card-hand{position:absolute;left:50%;transform:translateX(-50%);display:flex;justify-content:center;min-width:70%;z-index:2}
+.dealer-hand{top:44px}.player-hand{bottom:23px}
+.play-card{width:64px;height:91px;border-radius:8px;flex:none;background:linear-gradient(135deg,#fff,#e6eef1);border:3px solid #eef5ff;box-shadow:0 7px 15px #001f1a8a,0 0 0 1px #6e8792;position:relative;color:#1a1d30;margin-left:-6px;animation:cardArrival .3s ease both}
+.play-card.red{color:#d33c4c}
+.play-card.back{display:grid;place-items:center;border:4px solid white;background:repeating-linear-gradient(45deg,#5036a4 0 4px,#9a74e1 4px 8px,#5845af 8px 12px);color:#fff}
+.card-logo{display:grid;place-items:center;background:#293c79aa;border-radius:7px;width:82%;height:82%;font-size:23px;color:#ffeba4}.card-logo small{display:block;font-size:7px;letter-spacing:1px}
+.card-corner{font:800 14px/1 'Space Grotesk';position:absolute;top:6px;left:6px;display:flex;align-items:center;flex-direction:column;gap:2px}
+.card-corner span{font-size:12px}.card-corner.reverse{top:auto;left:auto;bottom:6px;right:6px;transform:rotate(180deg)}
+.card-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;text-shadow:1px 1px #fff}
+.table-center-copy{position:absolute;left:0;right:0;top:43%;display:flex;align-items:center;flex-direction:column;gap:6px;color:#e1d9a0;text-shadow:1px 2px 2px #012b18;text-align:center}
+.table-center-copy span,.table-center-copy small{font:800 10px 'Space Grotesk';letter-spacing:2px}.table-center-copy strong{font:800 37px 'Space Grotesk';opacity:.63;letter-spacing:3px}
+.casino-chips{position:absolute;right:22px;bottom:30px;display:flex;gap:0;z-index:3}
+.casino-chips i{width:35px;height:35px;border-radius:50%;border:5px dashed #fff8d7;background:#c64255;display:grid;place-items:center;color:white;font-size:10px;font-style:normal;font-weight:800;box-shadow:0 4px 8px #001b0eb3;margin-left:-9px}
+.casino-chips i:nth-child(2){background:#386ac5}.casino-chips i:nth-child(3){background:#6d42c9}.casino-chips i:nth-child(4){background:#d3a53e}
+@keyframes cardArrival{from{opacity:0;transform:translateY(-30px) rotate(-8deg)}to{opacity:1;transform:translateY(0)}}
+.casino-status{display:flex;align-items:center;gap:14px;padding:16px 22px;background:#142e2f;border-top:2px solid #c59b60;color:#c1eddb}
+.status-medal{width:47px;height:47px;background:#214e43;border:1px solid #479a7b;border-radius:50%;display:grid;place-items:center;font-size:26px;color:#fbe2a8}
+.casino-status strong{font:800 18px 'Space Grotesk';color:#f3e6bd}
+.casino-status p{font-size:11px;color:#9ebdaf;margin:4px 0}
+.casino-status.win{background:#204d35}.casino-status.loss{background:#442c2e}
+.status-kind{margin-left:auto;font-size:10px;color:#afc7bc;font-weight:800;white-space:nowrap}
+.casino-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 16px}
+.casino-buttons button{padding:14px 7px;border-radius:12px;border:1px solid #80bf9b;color:#12372b;background:linear-gradient(#91f4c4,#39b884);font-size:11px;font-weight:800;letter-spacing:.6px;min-height:52px;box-shadow:inset 0 2px #ffffff66,0 6px #112b28}
+.casino-buttons button:active:not(:disabled){transform:translateY(4px);box-shadow:inset 0 2px #ffffff66,0 2px #112b28}
+.casino-buttons .casino-stand{background:linear-gradient(#fff0a9,#dcad51);border-color:#e3c98c;color:#634617}
+.casino-buttons .casino-deal{background:linear-gradient(#bcb0ff,#735acd);border-color:#a997fa;color:white}
+.casino-buttons button:disabled{opacity:.43;box-shadow:none}
+.casino-hit b{font-size:16px}
+.casino-note{color:#98c1b0;text-align:center;font-size:10px;padding:9px 16px;line-height:1.5}
+/* Additional mini apps */
+.mini-app{padding:30px;min-height:545px;background:linear-gradient(150deg,#f1f0ff,#e5ecff);color:#252747}
+.mini-app-top{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#7066bf;font-size:10px;letter-spacing:1px;font-weight:800;border-bottom:1px solid #cacde9;padding-bottom:17px;margin-bottom:24px}
+.mini-app h2{font:800 clamp(25px,3vw,35px) 'Space Grotesk';letter-spacing:-1px;color:#272753;margin:8px 0 12px}
+.mini-app p{color:#747e9c;line-height:1.7;font-size:12px}
+.quiz-app{background:linear-gradient(145deg,#e4dcff,#d6eafa)}
+.quiz-prompt{font-size:10px;color:#8571d4;font-weight:800;letter-spacing:1px}
+.quiz-answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.quiz-answers button{display:flex;align-items:center;gap:12px;border:1px solid #b8bbdc;border-radius:13px;padding:18px 12px;background:white;color:#292a52;text-align:left;font-weight:800;font-size:12px}
+.quiz-answers button span{background:#e3defc;color:#6955ca;border-radius:8px;padding:9px}
+.quiz-answers button.right{border-color:#34a77b;background:#dcf9ea}.quiz-answers button.wrong{border-color:#df7c8a;background:#ffe4e9}
+.quiz-next{margin-top:20px;display:flex;align-items:center;gap:15px}.quiz-next button,.quiz-finish button,.app-primary{border:0;border-radius:10px;padding:13px 18px;background:#6857d0;color:white;font-size:12px;font-weight:800}
+.quiz-finish{text-align:center;padding:80px 0}.quiz-finish>span{font-size:65px}
+.tasks-app{background:#f4f8ff}.task-form{display:flex;gap:10px;margin:24px 0}.task-form input,.shop-app>input,.booking-card input,.booking-card select{flex:1;min-width:0;border:1px solid #c6cfe1;background:white;border-radius:10px;color:#202841;padding:13px}
+.task-form button{border:0;background:#6d5bdc;color:white;padding:12px;border-radius:10px;font-weight:800}
+.task-filters{display:flex;gap:8px;margin-bottom:22px}.task-filters button{border:1px solid #cad0e5;border-radius:9px;background:white;color:#6f7899;padding:10px 12px;font-size:11px;font-weight:800}
+.task-filters button.active{background:#6658cd;color:white}
+.task-list{display:grid;gap:10px}
+.task-row{display:flex;gap:10px;align-items:center;background:#fff;padding:12px;border:1px solid #dce2ef;border-radius:10px}
+.task-row span{flex:1;font-size:12px;font-weight:700}
+.task-row span.done{text-decoration:line-through;color:#9ea8bb}
+.task-row button{border:0;background:#e8eaf5;color:#7461c9;border-radius:8px;padding:9px}
+.task-row button.priority{background:#ffe8a7;color:#916b2d}.task-row .task-check.checked{background:#bcf4dd;color:#267c5e}
+.ttt-app{text-align:center;background:linear-gradient(135deg,#d9f5f2,#e7e5ff)}.ttt-grid{width:min(295px,90%);aspect-ratio:1;margin:20px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ttt-grid button{background:white;border:2px solid #a8a5d6;border-radius:12px;font:800 46px 'Space Grotesk';color:#7462d5}
+.ttt-grid button.o{color:#16a99c}.ttt-grid button:disabled{opacity:1}
+.booking-app{background:linear-gradient(145deg,#e4f8f7,#ecedff)}.booking-card{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;background:white;padding:21px;border-radius:16px;border:1px solid #cbdce9}
+.booking-card label{display:flex;flex-direction:column;gap:9px;color:#67799c;font-size:11px;font-weight:800}
+.booking-time,.booking-card .app-primary,.booking-card>p{grid-column:1/-1}
+.booking-time{font-size:11px;font-weight:800;color:#6e7e9d}.booking-time>div{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.booking-time button{border:1px solid #b9c5dc;background:#f4f7ff;padding:12px 5px;border-radius:10px;color:#454d7c;font-size:12px}
+.booking-time button.picked{background:#7261d4;color:white}.booking-time button:disabled{opacity:.35}
+.shop-app{background:linear-gradient(155deg,#f9e8ec,#eae9ff)}.shop-app>input{width:100%;margin-bottom:18px}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+.shop-card{border:1px solid #dfd7ed;background:white;border-radius:13px;padding:15px;display:flex;flex-direction:column;gap:7px}
+.shop-card>div{height:90px;background:linear-gradient(145deg,#cfccf5,#ffe3ec);display:grid;place-items:center;border-radius:11px;color:#7961d1;font-size:40px}
+.shop-card strong{font-size:13px}.shop-card small{font-size:10px;color:#919ab1}.shop-card b{color:#393362;font-size:12px}
+.shop-card button{background:#6756d2;color:white;border:0;border-radius:8px;padding:10px;font-size:11px;font-weight:800}
+.shop-total{margin-top:16px;border-top:1px solid #d6d7e6;padding-top:15px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.shop-total button{background:#6655d2;color:white;border:0;border-radius:9px;padding:11px;font-size:11px;font-weight:800}
+@media(max-width:1060px){.forge-workspace{grid-template-columns:1fr}.forge-chat-messages{height:285px}.forge-studio-intro{align-items:flex-start;flex-direction:column}.forge-studio-metrics{width:100%}.forge-studio-metrics>div{flex:1}}
+@media(max-width:650px){.forge-start-modal{padding:25px 17px}.forge-mode-selector{grid-template-columns:1fr}.forge-mode-selector button{min-height:100px}.forge-studio-top{flex-wrap:wrap}.forge-studio-intro h1{font-size:2.8rem}.forge-flow{gap:6px;padding:10px}.forge-flow .forge-step{font-size:8px}.forge-studio-metrics strong{font-size:25px}.forge-browser-title{font-size:10px}.forge-tabbar button{font-size:9px}.casino-top{padding:14px}.casino-table{padding:6px}.wood-rim{padding:6px}.felt{min-height:365px}.play-card{width:48px;height:70px}.card-center{font-size:25px}.table-center-copy strong{font-size:26px}.table-center-copy span,.table-center-copy small{font-size:8px}.player-position{bottom:100px}.casino-chips{display:none}.status-kind{display:none}.casino-buttons{gap:5px;padding:11px}.casino-buttons button{font-size:9px;padding:11px 3px}.mini-app{padding:19px}.quiz-answers{grid-template-columns:1fr}.booking-card{grid-template-columns:1fr}.booking-time{grid-column:1}.booking-card .app-primary,.booking-card>p{grid-column:1}.booking-time>div{grid-template-columns:repeat(2,1fr)}}
+@media(prefers-reduced-motion:reduce){.play-card{animation:none!important}}

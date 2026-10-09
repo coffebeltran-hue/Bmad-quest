@@ -2,10 +2,13 @@ import React,{useEffect,useState} from 'react';
 import{createRoot}from'react-dom/client';
 import './style.css';
 import StudioView from './Studio';
+import ForgeApp from './ForgeApp';
+import type {ForgeProject} from './forge-engine';
+import {interpretIdea,FORGE_START_CREDITS,FORGE_MISSION_REWARD,FORGE_PARTY_REWARD,claimGig} from './forge-engine';
 import {applyCreditDelta, canAfford, canRequestFunding, fundEmergency, MISSION_COSTS, PARTY_COSTS} from './economy';
 type Choice={label:string;note:string;delta:[number,number,number]};
 type Mission={title:string;topic:string;lead:string;brief:string;question:string;choices:[Choice,Choice]};
-type Save={startup:number;founder:string;index:number;credits:number;quality:number;insight:number;log:string[];party:number[];fundingUsed:string[]};
+type Save={startup:number;founder:string;index:number;credits:number;quality:number;insight:number;log:string[];party:number[];fundingUsed:string[];mode:'preset'|'prompt';project?:ForgeProject;earned:string[]};
 const startups=[['EduConnect','Plataforma de tutorías','🎓'],['FoodFlow','Pedidos para cafeterías','☕'],['BookEasy','Reservas de servicios','📅']];
 const agents=[['Mary','Analista','MA','violet'],['John','Product Manager','JO','blue'],['Sally','Diseñadora UX','SA','pink'],['Winston','Arquitecto','WI','cyan'],['Amelia','Developer','AM','amber']];
 const chapters=['La idea','El plan','Experiencia UX','Construcción','La crisis','Lanzamiento'];
@@ -40,7 +43,7 @@ const debates=[
 ['Code Review Crew','Amelia: hay casos límite. · Winston: revisemos mantenibilidad y seguridad.'],
 ['Presupuesto crítico','John: prioricemos. · Sally: no sacrifiquemos la tarea principal.']
 ];
-const initial=(startup:number,founder:string):Save=>({startup,founder,index:0,credits:100,quality:35,insight:0,log:[],party:[],fundingUsed:[]});
+const initial=(startup:number,founder:string):Save=>({startup,founder,index:0,credits:100,quality:35,insight:0,log:[],party:[],fundingUsed:[],mode:'preset',earned:[]});
 const key='bmad-quest-save-1';
 function load():Save|null {
  try {
@@ -50,7 +53,10 @@ function load():Save|null {
     !Number.isFinite(x.credits) || x.credits<0 ||
     !Number.isFinite(x.quality) || !Number.isFinite(x.insight) ||
     !Array.isArray(x.log) || !Array.isArray(x.party)) return null;
-  return {...x, fundingUsed:Array.isArray(x.fundingUsed)?x.fundingUsed.filter((id:unknown)=>typeof id==='string'):[]};
+  const blueprint=x.mode==='prompt'&&x.project&&typeof x.project.prompt==='string'?interpretIdea(x.project.prompt).project:null;
+  return {...x,mode:blueprint?'prompt':'preset',project:blueprint||undefined,
+    fundingUsed:Array.isArray(x.fundingUsed)?x.fundingUsed.filter((id:unknown)=>typeof id==='string'):[],
+    earned:Array.isArray(x.earned)?x.earned.filter((id:unknown)=>typeof id==='string'):[]};
  } catch { return null; }
 }
 
@@ -66,6 +72,8 @@ function App(){
  const [founder,setFounder]=useState('Fundador/a');
  const [startup,setStartup]=useState(0);
  const [showNew,setShowNew]=useState(false);
+ const [creationMode,setCreationMode]=useState<'preset'|'prompt'>('preset');
+ const [prompt,setPrompt]=useState('');
  const [feedback,setFeedback]=useState('');
  const [selectedDebate,setSelectedDebate]=useState(0);
  const [term,setTerm]=useState('');
@@ -77,10 +85,28 @@ function App(){
  function navigate(to:'home'|'game'|'academy'|'party'|'studio'|'report'){
    setFeedback('');setScreen(to);window.scrollTo({top:0,behavior:'smooth'});
  }
+ const analyzedIdea=interpretIdea(prompt);
  function begin(){
-   setSave(initial(startup,founder));
-   setScreen('game');setFeedback('');setShowNew(false);
+   if(creationMode==='prompt'){
+     if(!analyzedIdea.project)return;
+     const project=analyzedIdea.project;
+     setSave({...initial(0,founder),mode:'prompt',project,credits:FORGE_START_CREDITS});
+     setScreen('studio');
+   }else{
+     setSave(initial(startup,founder));
+     setScreen('game');
+   }
+   setFeedback('');setShowNew(false);
    window.scrollTo({top:0});
+ }
+ function earnCredits(gig:string){
+   setSave(current=>{
+     if(!current||current.mode!=='prompt')return current;
+     const awarded=claimGig(current.credits,current.mode,current.index,gig,current.earned);
+     if(!awarded)return current;
+     return {...current,credits:awarded.credits,earned:awarded.earned,
+       log:[...current.log,'Encargo completado: '+gig+' (+'+awarded.pay+' CR)']};
+   });
  }
  function decide(i:number){
    if(!save||!mission||feedback)return;
@@ -90,7 +116,7 @@ function App(){
      if(!current||current.index!==save.index)return current;
      const nextCredits=applyCreditDelta(current.credits,c.delta[0]);
      if(nextCredits===null)return current;
-     return {...current,index:current.index+1,credits:nextCredits,
+     return {...current,index:current.index+1,credits:nextCredits+(current.mode==='prompt'?FORGE_MISSION_REWARD:0),
        quality:Math.min(100,Math.max(0,current.quality+c.delta[1])),
        insight:Math.min(100,current.insight+c.delta[2]),
        log:[...current.log,mission.title+': '+c.label+' ('+(-c.delta[0])+' CR)']};
@@ -107,14 +133,14 @@ function App(){
      const nextCredits=applyCreditDelta(current.credits,delta);
      if(nextCredits===null)return current;
      return {...current,party:[...current.party,selectedDebate],
-       credits:nextCredits,insight:Math.min(100,current.insight+(wins?7:2)),
+       credits:nextCredits+(current.mode==='prompt'?FORGE_PARTY_REWARD:0),insight:Math.min(100,current.insight+(wins?7:2)),
        quality:Math.min(100,Math.max(0,current.quality+(wins?5:-4))),
        log:[...current.log,debates[selectedDebate][0]+': '+(wins?'Analizar perspectivas':'Decidir sin analizar')+' ('+(-delta)+' CR)']};
    });
  }
  function requestFunding(checkpoint:string,minCost:number){
    setSave(current=>{
-     if(!current)return current;
+     if(!current||current.mode==='prompt')return current;
      if(checkpoint.startsWith('mission:') && Number(checkpoint.slice(8))!==current.index)return current;
      if(checkpoint.startsWith('party:') && current.party.includes(Number(checkpoint.slice(6))))return current;
      const funding=fundEmergency(current,checkpoint,minCost);
@@ -198,16 +224,17 @@ function App(){
     <section className="crew-section"><div className="feature-intro"><div><span className="section-kicker">CONOCE AL SQUAD</span><h2>No estás <em>solo.</em></h2></div><p>Cinco especialistas con talentos diferentes. Elige a quién escuchar… y cuándo.</p></div><div className="crew-grid">{agents.map((a,i)=><div className={'crew-card crew-'+a[3]} key={a[0]}><CharacterArt name={a[0]}/><div className="crew-copy"><span>AGENTE 0{i+1}</span><h3>{a[0]}</h3><small>{a[1]}</small></div></div>)}</div></section>
     <section className="cta-banner"><span>✦ EL FUTURO ESTÁ EN TUS MANOS</span><h2>¿Listo para crear algo grande?</h2><p>Tu historia empieza con una decisión.</p><button className="btn-main" onClick={()=>setShowNew(true)}>Empezar mi aventura <b>→</b></button></section>
    </div>}
-   {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}><section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in"><button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button><span className="section-kicker">✦ CREA TU LEYENDA</span><h2>Tu aventura <em>empieza aquí.</em></h2><p>Elige un proyecto, reúne a tu equipo y decide qué clase de fundador quieres ser.</p><label htmlFor="founder">¿Cómo te llamamos?</label><input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/><div className="choose-label">SELECCIONA TU STARTUP <span>01 / 03</span></div><div className="startup-choices">{startups.map((s,i)=><button key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div><button className="btn-main modal-go" onClick={begin}>Fundar mi startup <b>→</b></button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
-   {save&&screen==='game'&&<div className="screen-in play-screen">
+   {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}><section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in forge-start-modal"><button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button><span className="section-kicker">✦ CREA TU PROPIA AVENTURA</span><h2>¿Qué quieres <em>construir?</em></h2><p>Elige un proyecto preparado o describe uno con tus palabras para convertirlo en una app interactiva.</p><label htmlFor="founder">Nombre del fundador</label><input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/><div className="forge-mode-selector"><button className={creationMode==='preset'?'selected':''} onClick={()=>setCreationMode('preset')}><span>◈</span><strong>Proyecto predeterminado</strong><small>3 proyectos · Presupuesto inicial 100 CR</small></button><button className={creationMode==='prompt'?'selected':''} onClick={()=>setCreationMode('prompt')}><span>✦</span><strong>Crear por instrucción</strong><small>6 tipos de apps · Presupuesto inicial 250 CR</small></button></div>{creationMode==='preset'?<><div className="choose-label">ESCOGE TU STARTUP <span>100 CR INICIALES</span></div><div className="startup-choices">{startups.map((s,i)=><button key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div></>:<><label htmlFor="forge-instruction">Tu instrucción para los agentes</label><textarea id="forge-instruction" className="forge-prompt-field" maxLength={400} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Ejemplo: Quiero una app que me permita jugar blackjack contra un crupier virtual"/><div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Reservas','Necesito una app para reservar citas en una barbería'],['✦ Trivia','Quiero una trivia de preguntas de cultura general']].map(([name,text])=><button key={name} onClick={()=>setPrompt(text)}>{name}</button>)}</div>{prompt.trim().length>0&&<div className={'forge-interpretation '+(analyzedIdea.project?'recognized':'unsupported')}>{analyzedIdea.project?<><strong>✓ Motor encontrado: {analyzedIdea.project.title}</strong><p>{analyzedIdea.project.summary}</p></>:<p>{analyzedIdea.error}</p>}</div>}<small className="forge-model-note">El intérprete utiliza plantillas reales y reglas locales. No es IA generativa universal. Ideas fuera de las seis categorías se indican como no soportadas.</small></>}<button className="btn-main modal-go" onClick={begin} disabled={creationMode==='prompt'&&!analyzedIdea.project}>{creationMode==='prompt'?'Crear y probar mi app →':'Fundar mi startup →'}</button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
+      {save&&screen==='game'&&<div className="screen-in play-screen">
      <div className="game-topline"><span>◈ CENTRO DE OPERACIONES</span><span>PARTIDA GUARDADA AUTOMÁTICAMENTE <i className="signal-dot"/></span></div>
-     <div className="game-heading"><div><span className="section-kicker">HOLA, {save.founder.toUpperCase()}</span><h1>Tu startup, <em>tu historia.</em></h1><p>{startups[save.startup][0]} · {startups[save.startup][1]}</p></div><div className="level-gem"><span>✦</span><div><small>RANGO ACTUAL</small><b>LEVEL {1+Math.floor(save.index/3)}</b></div></div></div>
+     <div className="game-heading"><div><span className="section-kicker">HOLA, {save.founder.toUpperCase()}</span><h1>Tu startup, <em>tu historia.</em></h1><p>{save.mode==='prompt'&&save.project?save.project.title+' · Construido desde tu instrucción':startups[save.startup][0]+' · '+startups[save.startup][1]}</p></div><div className="level-gem"><span>✦</span><div><small>RANGO ACTUAL</small><b>LEVEL {1+Math.floor(save.index/3)}</b></div></div></div>
      <div className="hud">
        <div className="hud-tile"><div className="hud-symbol purple">◎</div><div><small>CRÉDITOS</small><strong>{save.credits}<span> CR</span></strong></div></div>
        <div className="hud-tile"><div className="hud-symbol turquoise">◆</div><div><small>CALIDAD</small><strong>{save.quality}<span> %</span></strong></div></div>
        <div className="hud-tile"><div className="hud-symbol orange">✦</div><div><small>CONOCIMIENTO</small><strong>{save.insight}<span> %</span></strong></div></div>
        <div className="hud-tile"><div className="hud-symbol pink">◉</div><div><small>MISIONES</small><strong>{save.index}<span> / 18</span></strong></div></div>
      </div>
+     {save.mode==='prompt'&&<div className="forge-game-banner"><span>✦ APP CREADA DESDE TU INSTRUCCIÓN</span><strong>{save.project?.title} · +{FORGE_MISSION_REWARD} CR por misión · +{FORGE_PARTY_REWARD} CR por debate</strong><button onClick={()=>navigate('studio')}>Abrir app jugable ↗</button></div>}
      <div className="hub-layout">
       <div className="hub-main">
        <div className="hub-card">
@@ -227,14 +254,14 @@ function App(){
        <article id="mission-panel" className="mission-panel">
         {mission?<><div className="mission-banner"><div><span className="section-kicker">CAPÍTULO {chapter+1} · MISIÓN {save.index+1} DE 18</span><h2>{feedback?'¡Misión superada!':mission.title}</h2><span className="concept-chip">✦ {mission.topic}</span></div><CharacterArt name={currentAgent} variant="mini"/></div>
         <div className="mission-story"><CharacterArt name={currentAgent} variant="mini"/><div><span>{currentAgent.toUpperCase()} · TU MENTOR</span><p>{feedback?feedback:mission.brief}</p></div></div>
-        {feedback?<div className="mission-reward"><div className="reward-star">★</div><div><strong>¡Una decisión más cerca de tu meta!</strong><p>Conocimiento y experiencia desbloqueados. Tu aventura continúa.</p></div><button className="btn-main" onClick={()=>{setFeedback('');if(save.index>=18)navigate('report')}}>{save.index>=18?'Ver mi resultado ↗':'Siguiente misión →'}</button></div>:<><div className="decision-heading">TU PRÓXIMA DECISIÓN</div><h3>{mission.question}</h3><div className="mission-options">{mission.choices.map((c,i)=><button key={c.label} onClick={()=>decide(i)} disabled={!canAfford(save.credits,Math.max(0,-c.delta[0]))} title={!canAfford(save.credits,Math.max(0,-c.delta[0]))?'Créditos insuficientes':''}><span className="option-letter">{String.fromCharCode(65+i)}</span><span>{c.label}<small className="decision-price">{Math.max(0,-c.delta[0])} CR {!canAfford(save.credits,Math.max(0,-c.delta[0]))?'· Saldo insuficiente':'· Disponible'}</small></span><b>↗</b></button>)}</div>{mission.choices.every(c=>!canAfford(save.credits,Math.max(0,-c.delta[0])))&&<div className="funding-panel" role="status"><strong>Fondos insuficientes</strong><p>No puedes gastar más créditos de los que tienes. Puedes aceptar un trabajo de emergencia para recuperar 20 CR a cambio de perder 7 puntos de calidad.</p><button className="funding-button" disabled={!canRequestFunding(save.credits,MISSION_COSTS[0],'mission:'+save.index,save.fundingUsed)} onClick={()=>requestFunding('mission:'+save.index,MISSION_COSTS[0])}>Obtener 20 CR · -7 calidad →</button></div>}</>}
+        {feedback?<div className="mission-reward"><div className="reward-star">★</div><div><strong>¡Una decisión más cerca de tu meta!</strong><p>Conocimiento y experiencia desbloqueados. Tu aventura continúa.</p></div><button className="btn-main" onClick={()=>{setFeedback('');if(save.index>=18)navigate('report')}}>{save.index>=18?'Ver mi resultado ↗':'Siguiente misión →'}</button></div>:<><div className="decision-heading">TU PRÓXIMA DECISIÓN</div><h3>{mission.question}</h3><div className="mission-options">{mission.choices.map((c,i)=><button key={c.label} onClick={()=>decide(i)} disabled={!canAfford(save.credits,Math.max(0,-c.delta[0]))} title={!canAfford(save.credits,Math.max(0,-c.delta[0]))?'Créditos insuficientes':''}><span className="option-letter">{String.fromCharCode(65+i)}</span><span>{c.label}<small className="decision-price">{Math.max(0,-c.delta[0])} CR {!canAfford(save.credits,Math.max(0,-c.delta[0]))?'· Saldo insuficiente':'· Disponible'}</small></span><b>↗</b></button>)}</div>{save.mode==='preset'&&mission.choices.every(c=>!canAfford(save.credits,Math.max(0,-c.delta[0])))&&<div className="funding-panel" role="status"><strong>Fondos insuficientes</strong><p>No puedes gastar más créditos de los que tienes. Puedes aceptar un trabajo de emergencia para recuperar 20 CR a cambio de perder 7 puntos de calidad.</p><button className="funding-button" disabled={!canRequestFunding(save.credits,MISSION_COSTS[0],'mission:'+save.index,save.fundingUsed)} onClick={()=>requestFunding('mission:'+save.index,MISSION_COSTS[0])}>Obtener 20 CR · -7 calidad →</button></div>}</>}
         </>:<div className="mission-finish"><span className="section-kicker">✦ OBJETIVO COMPLETADO</span><h2>¡Lanzaste tu startup!</h2><p>Terminaste las 18 misiones. Es hora de conocer los resultados.</p><button className="btn-main" onClick={()=>navigate('report')}>Ver resultados ↗</button></div>}
        </article>
       </div>
       <aside className="quest-side"><div className="quest-map"><div className="side-heading"><span>MAPA DE LA AVENTURA</span><b>{progress}%</b></div><div className="progress-track"><i style={{width:progress+'%'}}/></div>{chapters.map((title,i)=><div key={title} className={'quest-node '+(i===chapter?'current ':'')+(i<chapter?'complete ':'')+(i>chapter?'locked':'')}><div className="node-index">{i<chapter?'✓':('0'+(i+1))}</div><div><strong>{title}</strong><small>{i<chapter?'Completado':i===chapter?'En progreso':'Por desbloquear'}</small></div>{i===chapter&&<span className="playing-dot"/>}</div>)}</div><div className="party-teaser"><span>◈ PARTY MODE</span><h3>Las mejores ideas se debaten.</h3><p>Reúne a los agentes, escucha argumentos y decide.</p><button onClick={()=>navigate('party')}>Entrar a la sala ↗</button></div></aside>
      </div>
    </div>}
-   {save&&screen==='studio'&&<StudioView save={save} missions={missions} debates={debates} onBack={()=>navigate('game')}/>}
+   {save&&screen==='studio'&&(save.mode==='prompt'&&save.project?<ForgeApp project={save.project} save={save} missions={missions} debates={debates} onBack={()=>navigate('game')} onEarn={earnCredits}/>:<StudioView save={save} missions={missions} debates={debates} onBack={()=>navigate('game')}/>)}
    {save&&screen==='party'&&<div className="screen-in party-screen"><div className="game-topline"><span>◈ SALA DE REUNIONES</span><span>{save.party.length} / 8 DEBATES TERMINADOS</span></div>
      <div className="game-heading"><div><span className="section-kicker">✦ THINK TOGETHER</span><h1>Welcome to <em>Party Mode.</em></h1><p>Cinco mentes. Distintas perspectivas. La última palabra siempre es tuya.</p></div><button className="btn-ghost" onClick={()=>navigate('game')}>← Volver a la oficina</button></div>
      <div className="party-workspace">
@@ -246,7 +273,7 @@ function App(){
        <select aria-label="Elegir escenario de debate" value={selectedDebate} onChange={e=>setSelectedDebate(Number(e.target.value))}>{debates.map((d,i)=><option key={d[0]} value={i}>{d[0]}{save.party.includes(i)?' ✓':''}</option>)}</select>
        <h2>{debates[selectedDebate][0]}</h2>
        <div className="dialogue-scroll">{debates[selectedDebate][1].split(' · ').map((text,i)=>{const [who,...parts]=text.split(':');return <div className="speech" key={i}><CharacterArt name={agents.some(a=>a[0]===who)?who:'Mary'} variant="mini"/><div><strong>{who}</strong><p>{parts.join(':').trim()}</p></div></div>})}</div>
-       {save.party.includes(selectedDebate)?<div className="party-complete"><span>★</span><div><strong>Debate completado</strong><small>La decisión se guardó en el historial de tu startup.</small></div></div>:<div className="party-choices"><strong>¿QUÉ HACES COMO FUNDADOR?</strong><button disabled={!canAfford(save.credits,PARTY_COSTS[0])} onClick={()=>debate(0)}><span>01</span> Analizar los argumentos y decidir con evidencia <small>{PARTY_COSTS[0]} CR</small><b>↗</b></button><button disabled={!canAfford(save.credits,PARTY_COSTS[1])} onClick={()=>debate(1)}><span>02</span> Decidir rápido sin revisar las objeciones <small>{PARTY_COSTS[1]} CR</small><b>↗</b></button>{!canAfford(save.credits,PARTY_COSTS[0])&&<div className="funding-panel" role="status"><strong>Sin presupuesto para debatir</strong><p>Obtén 20 CR con una actividad de emergencia. El coste es -7 de calidad.</p><button className="funding-button" disabled={!canRequestFunding(save.credits,PARTY_COSTS[0],'party:'+selectedDebate,save.fundingUsed)} onClick={()=>requestFunding('party:'+selectedDebate,PARTY_COSTS[0])}>Obtener 20 CR · -7 calidad →</button></div>}</div>}
+       {save.party.includes(selectedDebate)?<div className="party-complete"><span>★</span><div><strong>Debate completado</strong><small>La decisión se guardó en el historial de tu startup.</small></div></div>:<div className="party-choices"><strong>¿QUÉ HACES COMO FUNDADOR?</strong><button disabled={!canAfford(save.credits,PARTY_COSTS[0])} onClick={()=>debate(0)}><span>01</span> Analizar los argumentos y decidir con evidencia <small>{PARTY_COSTS[0]} CR</small><b>↗</b></button><button disabled={!canAfford(save.credits,PARTY_COSTS[1])} onClick={()=>debate(1)}><span>02</span> Decidir rápido sin revisar las objeciones <small>{PARTY_COSTS[1]} CR</small><b>↗</b></button>{save.mode==='preset'&&!canAfford(save.credits,PARTY_COSTS[0])&&<div className="funding-panel" role="status"><strong>Sin presupuesto para debatir</strong><p>Obtén 20 CR con una actividad de emergencia. El coste es -7 de calidad.</p><button className="funding-button" disabled={!canRequestFunding(save.credits,PARTY_COSTS[0],'party:'+selectedDebate,save.fundingUsed)} onClick={()=>requestFunding('party:'+selectedDebate,PARTY_COSTS[0])}>Obtener 20 CR · -7 calidad →</button></div>}</div>}
        <p className="sim-note">Simulación educativa con diálogos programados. No utiliza modelos de IA reales.</p>
       </div>
      </div>
