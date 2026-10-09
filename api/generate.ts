@@ -1,4 +1,4 @@
-import {timingSafeEqual} from 'node:crypto';
+import {authorizePaid} from './_access.ts';
 import {validateGeneratedBundle} from '../src/generated-app.ts';
 /**
  * Private beta: generate original HTML/CSS/JavaScript for one browser-only miniapp.
@@ -47,24 +47,20 @@ export function OPTIONS(req:Request){
 export async function POST(req:Request):Promise<Response>{
  const origin=checkOrigin(req);
  if(!origin.allowed)return respond(403,{error:'Origen no permitido'});
- if(!process.env.OPENAI_API_KEY||!process.env.FORGE_BETA_CODE)
-  return respond(503,{error:'Configura OPENAI_API_KEY y FORGE_BETA_CODE en Vercel.'},origin.origin);
- const received=Buffer.from(req.headers.get('x-forge-beta-code')||'');
- const expected=Buffer.from(process.env.FORGE_BETA_CODE);
- if(received.length!==expected.length||!timingSafeEqual(received,expected))
-  return respond(401,{error:'Código beta incorrecto.'},origin.origin);
  if(req.headers.get('content-type')?.split(';')[0].trim()!=='application/json')
   return respond(415,{error:'Se requiere JSON.'},origin.origin);
  if(Number(req.headers.get('content-length')||0)>1800)
   return respond(413,{error:'Solicitud demasiado grande.'},origin.origin);
- let prompt='';
+ let prompt='';let turnstileToken:unknown;
  try{
   const payload=await req.json();
   if(!payload||typeof payload.prompt!=='string')throw Error('missing prompt');
-  prompt=payload.prompt.trim();
+  prompt=payload.prompt.trim();turnstileToken=payload.turnstileToken;
  }catch{return respond(400,{error:'Solicitud JSON inválida.'},origin.origin)}
  if(prompt.length<12||prompt.length>400)
   return respond(400,{error:'Describe tu idea entre 12 y 400 caracteres.'},origin.origin);
+ const access=await authorizePaid(req,'generate',turnstileToken);
+ if(!access.ok)return respond(access.status,{error:access.error},origin.origin);
  const model=process.env.OPENAI_CODE_MODEL||'gpt-5-mini';
  try{
   const res=await fetch('https://api.openai.com/v1/responses',{

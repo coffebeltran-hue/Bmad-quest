@@ -1,3 +1,7 @@
+## Acceso público controlado a IA
+
+Se incluye un modo invitado sin código beta, pero **solo se activa** con Redis, Turnstile y límites configurados en Vercel. Mientras falten esas protecciones, el acceso privado actual sigue funcionando. Consulta [docs/PUBLIC_AI_ACCESS.md](docs/PUBLIC_AI_ACCESS.md).
+
 # BMAD: Startup Quest
 
 Videojuego educativo **no oficial** inspirado en BMAD Method. Administra una startup tecnológica y aprende exploración de problemas, PRD, UX, arquitectura, QA, Party Mode y retrospectivas.

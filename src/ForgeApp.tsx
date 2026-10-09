@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import type {FormEvent} from 'react';
 import type {ForgeProject} from './forge-engine';
 import {validateGeneratedBundle} from './generated-app';
+import {TurnstileChallenge,usePublicAccess} from './public-ai';
 import {GIGS,canClaimGig} from './forge-engine';
 import {buildConversation,studioPercent,studioStage,RELEASES} from './studio-engine';
 import type {StudioMission} from './studio-engine';
@@ -50,6 +51,9 @@ export default function ForgeApp({project,save,missions,debates,onBack,onEarn,re
  const [speed,setSpeed]=useState(900);
  const [revisionPrompt,setRevisionPrompt]=useState('');
  const [betaCode,setBetaCode]=useState('');
+ const [humanToken,setHumanToken]=useState('');
+ const [humanReset,setHumanReset]=useState(0);
+ const access=usePublicAccess(refineUrl);
  const [isRevising,setIsRevising]=useState(false);
  const [revisionError,setRevisionError]=useState('');
  const [revisionSuccess,setRevisionSuccess]=useState('');
@@ -87,15 +91,18 @@ export default function ForgeApp({project,save,missions,debates,onBack,onEarn,re
    const instruction=revisionPrompt.trim();
    if(isRevising||!refineUrl)return;
    if(instruction.length<8||instruction.length>450){setRevisionError('Describe el cambio entre 8 y 450 caracteres.');return}
-   if(!betaCode.trim()){setRevisionError('Necesitas el código de acceso a la beta.');return}
+   if(access.mode==='public'?!humanToken:!betaCode.trim()){
+     setRevisionError(access.mode==='public'?'Completa el control antibots.':'Necesitas el código de acceso a la beta.');return
+   }
    setIsRevising(true);setRevisionError('');setRevisionSuccess('');
    try{
      const payload=project.kind==='generated'&&project.generated?
        {instruction,app:project.generated}:
        {instruction,original:{kind:project.kind,title:project.title,prompt:project.prompt,summary:project.summary}};
      const response=await fetch(refineUrl,{
-       method:'POST',headers:{'Content-Type':'application/json','X-Forge-Beta-Code':betaCode},
-       body:JSON.stringify(payload),signal:AbortSignal.timeout(65000)
+       method:'POST',headers:{'Content-Type':'application/json',...(access.mode==='private'?{'X-Forge-Beta-Code':betaCode}:{})},
+       body:JSON.stringify({...payload,...(access.mode==='public'?{turnstileToken:humanToken}:{})}),
+       signal:AbortSignal.timeout(65000)
      });
      const raw=await response.json();
      if(!response.ok)throw new Error(typeof raw.error==='string'?raw.error:'La IA no pudo editar la app.');
@@ -107,7 +114,7 @@ export default function ForgeApp({project,save,missions,debates,onBack,onEarn,re
      setRevisionSuccess(raw.recreated?'Se creó una versión independiente basada en tu proyecto y tu solicitud. Revisa que conserve las funciones originales.':'Nueva versión creada a partir de tus archivos anteriores. Pruébala en «App en vivo».');
      setPanel('preview');setPlaying(false);setReplayActive(false);setPreviewKey(v=>v+1);
    }catch(error){setRevisionError(error instanceof Error?error.message:'No fue posible actualizar la aplicación.')}
-   finally{setIsRevising(false)}
+   finally{setIsRevising(false);if(access.mode==='public'){setHumanToken('');setHumanReset(k=>k+1)}}
  }
  function restoreVersion(){
    if(isRevising)return;
@@ -130,10 +137,16 @@ export default function ForgeApp({project,save,missions,debates,onBack,onEarn,re
    <div className="forge-edit-suggestions"><span>Ideas rápidas</span>
      {['Añade un historial de resultados','Mejora los colores y animaciones','Agrega opciones para personalizar la app'].map(s=><button type="button" key={s} disabled={isRevising} onClick={()=>setRevisionPrompt(s)}>{s}</button>)}
    </div>
-   <label htmlFor="forge-edit-beta-code">Código beta de IA</label>
-   <input type="password" autoComplete="off" id="forge-edit-beta-code" value={betaCode} onChange={e=>setBetaCode(e.target.value)} disabled={isRevising} placeholder="El código de acceso configurado en Vercel"/>
+   {access.mode==='public'?<div className="forge-public-access">
+    <strong>Mejoras gratuitas con cupo diario</strong>
+    <p>No necesitas contraseña. Completa la verificación antibots; las ediciones y las nuevas apps comparten un cupo diario por IP.</p>
+    <TurnstileChallenge siteKey={access.siteKey||''} onToken={setHumanToken} resetKey={humanReset}/>
+   </div>:<>
+    <label htmlFor="forge-edit-beta-code">Código beta de IA</label>
+    <input type="password" autoComplete="off" id="forge-edit-beta-code" value={betaCode} onChange={e=>setBetaCode(e.target.value)} disabled={isRevising} placeholder="El código de acceso configurado en Vercel"/>
+   </>}
    {project.kind!=='generated'&&<p className="forge-conversion-note">Este proyecto usa un motor preprogramado. La IA construirá una versión nueva basada en la idea y los cambios solicitados; su diseño y reglas pueden ser distintos. Podrás volver a la anterior.</p>}
-   <button className="forge-refine-submit" type="submit" disabled={isRevising||!refineUrl||!betaCode.trim()||revisionPrompt.trim().length<8}>{isRevising?'◌ Amelia está actualizando el código…':'✦ Pedir mejora a los agentes →'}</button>
+   <button className="forge-refine-submit" type="submit" disabled={isRevising||!refineUrl||(access.mode==='public'?!humanToken:!betaCode.trim())||revisionPrompt.trim().length<8}>{isRevising?'◌ Amelia está actualizando el código…':'✦ Pedir mejora a los agentes →'}</button>
    {!refineUrl&&<p className="forge-revision-error">Las mejoras por IA se habilitan desde el despliegue de Vercel, con la API configurada.</p>}
    {isRevising&&<p className="forge-revision-progress" role="status">Mary analiza el cambio, Winston revisa la estructura y Amelia escribe HTML, CSS y JavaScript. Puede tardar hasta un minuto. No cierres esta pantalla.</p>}
    {revisionError&&<p role="alert" className="forge-revision-error">{revisionError}</p>}

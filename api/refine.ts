@@ -1,4 +1,4 @@
-import {timingSafeEqual} from 'node:crypto';
+import {authorizePaid} from './_access.ts';
 import {validateGeneratedBundle} from '../src/generated-app.ts';
 /** Refines generated sources; prebuilt engines are explicitly RECREATED, not patched. */
 export const maxDuration=60;
@@ -11,7 +11,7 @@ const schema={
    properties:{html:{type:'string'},css:{type:'string'},javascript:{type:'string'}}}
  }
 };
-type Incoming={instruction?:unknown;app?:unknown;original?:unknown};
+type Incoming={instruction?:unknown;app?:unknown;original?:unknown;turnstileToken?:unknown};
 function reply(status:number,data:unknown,origin?:string):Response{
  return new Response(JSON.stringify(data),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Vary':'Origin','X-Content-Type-Options':'nosniff',
@@ -33,9 +33,6 @@ export function OPTIONS(req:Request){
 export async function POST(req:Request):Promise<Response>{
  const origin=allowed(req);
  if(!origin.ok)return reply(403,{error:'Origen no permitido'});
- if(!process.env.OPENAI_API_KEY||!process.env.FORGE_BETA_CODE)return reply(503,{error:'La edición IA no está configurada en Vercel.'},origin.origin);
- const provided=Buffer.from(req.headers.get('x-forge-beta-code')||''),expected=Buffer.from(process.env.FORGE_BETA_CODE);
- if(provided.length!==expected.length||!timingSafeEqual(provided,expected))return reply(401,{error:'Código beta incorrecto.'},origin.origin);
  if(req.headers.get('content-type')?.split(';')[0].trim()!=='application/json')return reply(415,{error:'Se requiere JSON.'},origin.origin);
  if(Number(req.headers.get('content-length')||0)>100000)return reply(413,{error:'Aplicación demasiado grande para editar.'},origin.origin);
  let data:Incoming;
@@ -54,6 +51,8 @@ export async function POST(req:Request):Promise<Response>{
  }
  const current=bundle?JSON.stringify(bundle):JSON.stringify(original);
  if(current.length>85000)return reply(413,{error:'El código actual supera el límite de edición.'},origin.origin);
+ const access=await authorizePaid(req,'refine',data.turnstileToken);
+ if(!access.ok)return reply(access.status,{error:access.error},origin.origin);
  const prompt=data.instruction.trim();
  const instruction=bundle?
   'EDITA esta miniapp existente. Conserva todas las características y la lógica que funcionaban, salvo lo que cambie el usuario. Envía el archivo completo actualizado, nunca un diff.' :

@@ -8,6 +8,7 @@ import ForgeApp from './ForgeApp';
 import type {ForgeProject} from './forge-engine';
 import {validateBlueprint} from './universal-engine';
 import {validateGeneratedBundle} from './generated-app';
+import {TurnstileChallenge,usePublicAccess} from './public-ai';
 import {applyRevision,undoRevision} from './forge-revisions';
 import {interpretIdea,FORGE_START_CREDITS,FORGE_MISSION_REWARD,FORGE_PARTY_REWARD,claimGig} from './forge-engine';
 import {applyCreditDelta, canAfford, canRequestFunding, fundEmergency, MISSION_COSTS, PARTY_COSTS} from './economy';
@@ -94,11 +95,14 @@ function App(){
  const [forgeBetaCode,setForgeBetaCode]=useState('');
  const [generatingAI,setGeneratingAI]=useState(false);
  const [aiError,setAiError]=useState('');
+ const [turnstileToken,setTurnstileToken]=useState('');
+ const [turnstileReset,setTurnstileReset]=useState(0);
  const forgeAPI=import.meta.env.VITE_FORGE_API_URL||(
     window.location.hostname.endsWith('.vercel.app')?'/api/forge':''
  );
  const forgeGeneratorAPI=forgeAPI?forgeAPI.replace(/\/forge\/?$/,'/generate'):'';
  const forgeRefineAPI=forgeAPI?forgeAPI.replace(/\/forge\/?$/,'/refine'):'';
+ const aiAccess=usePublicAccess(forgeGeneratorAPI);
  const [feedback,setFeedback]=useState('');
  const [selectedDebate,setSelectedDebate]=useState(0);
  const [term,setTerm]=useState('');
@@ -122,13 +126,15 @@ function App(){
    if(prompt.trim().length<12||prompt.trim().length>400){
      setAiError('Describe tu idea en 12 a 400 caracteres.');return;
    }
-   if(!forgeBetaCode.trim()){setAiError('Escribe tu código de acceso beta.');return}
+   if(aiAccess.mode==='public'?!turnstileToken:!forgeBetaCode.trim()){
+     setAiError(aiAccess.mode==='public'?'Completa la verificación antibots.':'Escribe tu código de acceso beta.');return
+   }
    setGeneratingAI(true);setAiError('');
    try{
      const response=await fetch(forgeGeneratorAPI,{
        method:'POST',
-       headers:{'Content-Type':'application/json','X-Forge-Beta-Code':forgeBetaCode},
-       body:JSON.stringify({prompt:prompt.trim()}),
+       headers:{'Content-Type':'application/json',...(aiAccess.mode==='private'?{'X-Forge-Beta-Code':forgeBetaCode}:{})},
+       body:JSON.stringify({prompt:prompt.trim(),...(aiAccess.mode==='public'?{turnstileToken}:{})}),
        signal:AbortSignal.timeout(65000)
      });
      const payload=await response.json();
@@ -143,7 +149,7 @@ function App(){
      setForgeBetaCode('');window.scrollTo({top:0});
    }catch(error){
      setAiError(error instanceof Error?error.message:'No se pudo contactar con el generador.');
-   }finally{setGeneratingAI(false)}
+   }finally{setGeneratingAI(false);if(aiAccess.mode==='public'){setTurnstileToken('');setTurnstileReset(x=>x+1)}}
  }
  function begin(){
    if(creationMode==='prompt'){
@@ -340,11 +346,17 @@ function App(){
    <div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Ruleta','Quiero una ruleta con efectos, fichas virtuales y un historial de resultados'],['✦ Plataformas','Quiero un juego de plataformas con un personaje que salte obstáculos']].map(([name,text])=><button type="button" key={name} onClick={()=>{setPrompt(text);setAiError('')}}>{name}</button>)}</div>
    <div className="forge-creation-explainer"><strong>✦ El modelo escribirá código para tu idea</strong><p>Obtendrás HTML, CSS y JavaScript propios, mostrados en una vista previa aislada. El resultado puede requerir correcciones y cada generación consume saldo de OpenAI API.</p></div>
    {forgeAPI?<div className="forge-ai-beta forge-ai-code-beta">
-     <label htmlFor="forge-beta-code">Código de acceso a la IA (FORGE_BETA_CODE)</label>
-     <input id="forge-beta-code" type="password" value={forgeBetaCode} onChange={e=>{setForgeBetaCode(e.target.value);setAiError('')}} autoComplete="off" placeholder="Escribe tu código privado de beta"/>
-     <p className="forge-beta-help">No introduzcas aquí tu OPENAI_API_KEY. Esa clave permanece exclusivamente en Vercel.</p>
+     {aiAccess.mode==='public'?<div className="forge-public-access">
+       <strong>Acceso gratuito para visitantes</strong>
+       <p>No necesitas contraseña. Tienes hasta {aiAccess.limits?.generations??2} apps al día por IP, dentro del cupo compartido del servicio. Completa la verificación antibots para empezar.</p>
+       <TurnstileChallenge siteKey={aiAccess.siteKey||''} onToken={setTurnstileToken} resetKey={turnstileReset}/>
+     </div>:<>
+       <label htmlFor="forge-beta-code">Código de acceso a la IA (FORGE_BETA_CODE)</label>
+       <input id="forge-beta-code" type="password" value={forgeBetaCode} onChange={e=>{setForgeBetaCode(e.target.value);setAiError('')}} autoComplete="off" placeholder="Escribe tu código privado de beta"/>
+       <p className="forge-beta-help">El acceso público todavía no está activado en el servidor. No introduzcas tu OPENAI_API_KEY.</p>
+     </>}
      <button type="button" className="forge-ai-main-submit" disabled={generatingAI} onClick={createWithAI}>{generatingAI?'◌ Los agentes están programando…':'✦ Crear mi aplicación con IA →'}</button>
-     {!generatingAI&&(!prompt.trim()||!forgeBetaCode.trim())&&<p className="forge-ai-prompt-help">Para comenzar, escribe una idea y el código de acceso a la beta.</p>}
+     {!generatingAI&&(!prompt.trim()||(aiAccess.mode==='private'?!forgeBetaCode.trim():!turnstileToken))&&<p className="forge-ai-prompt-help">{aiAccess.mode==='public'?'Escribe la idea y completa la verificación antibots.':'Escribe la idea y tu código beta. La beta pública se activa al configurar las protecciones del servidor.'}</p>}
      {generatingAI&&<p role="status" className="forge-ai-progress">Generando tu aplicación. Esto puede tardar cerca de un minuto; mantén abierta esta pantalla.</p>}
      {aiError&&<p role="alert" className="forge-ai-error">{aiError}</p>}
    </div>:<div className="forge-ai-unavailable" role="status">

@@ -3,7 +3,7 @@
  * Secret material stays on the server. This is a private beta, NOT an open
  * code-generation sandbox or an unlimited public API.
  */
-import {timingSafeEqual} from 'node:crypto';
+import {authorizePaid} from './_access.ts';
 import {validateBlueprint} from '../src/universal-engine.ts';
 import {interpretIdea} from '../src/forge-engine.ts';
 
@@ -35,10 +35,6 @@ const capabilitiesByMode:Record<string,string[]>={
  dashboard:['Registrar indicadores','Consultar cifras agregadas','Exportar CSV'],
  game:['Responder preguntas','Acumular puntos','Continuar a nuevos retos']
 };
-function authorized(value:string,expected:string):boolean{
- const a=Buffer.from(value),b=Buffer.from(expected);
- return a.length===b.length&&timingSafeEqual(a,b);
-}
 function reply(body:unknown,status:number,origin?:string):Response{
  return new Response(JSON.stringify(body),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
@@ -69,26 +65,22 @@ export async function POST(req:Request):Promise<Response>{
  const check=originAllowed(req);
  if(!check.ok)return reply({error:'Origen no permitido'},403);
  const origin=check.origin;
- if(!process.env.OPENAI_API_KEY||!process.env.FORGE_BETA_CODE){
-  return reply({error:'La generación con IA aún no está configurada en el servidor.'},503,origin);
- }
- if(!authorized(req.headers.get('x-forge-beta-code')||'',process.env.FORGE_BETA_CODE)){
-  return reply({error:'Código de acceso beta incorrecto.'},401,origin);
- }
  if(req.headers.get('content-type')?.split(';')[0].trim()!=='application/json'){
   return reply({error:'Se requiere JSON.'},415,origin);
  }
  const length=Number(req.headers.get('content-length')||0);
  if(length>1500)return reply({error:'Solicitud demasiado grande.'},413,origin);
- let prompt='';
+ let prompt='';let turnstileToken:unknown;
  try {
   const payload=await req.json();
   if(!payload||typeof payload.prompt!=='string')throw Error('prompt');
-  prompt=payload.prompt.trim();
+  prompt=payload.prompt.trim();turnstileToken=payload.turnstileToken;
  }catch {return reply({error:'Cuerpo inválido.'},400,origin)}
  if(prompt.length<12||prompt.length>400)return reply({error:'Describe tu idea en 12 a 400 caracteres.'},400,origin);
  const localInterpretation=interpretIdea(prompt);
  if(!localInterpretation.project)return reply({error:localInterpretation.error},422,origin);
+ const access=await authorizePaid(req,'forge',turnstileToken);
+ if(!access.ok)return reply({error:access.error},access.status,origin);
  const model=process.env.OPENAI_FORGE_MODEL||'gpt-5-mini';
  try{
   const response=await fetch('https://api.openai.com/v1/responses',{

@@ -370,3 +370,10 @@
 .forge-open-vercel{display:block;margin-top:14px;padding:13px 15px;border-radius:10px;background:#8fead6;color:#112e40!important;text-decoration:none;text-align:center;font-size:13px;font-weight:800}
 .forge-open-vercel:hover{filter:brightness(1.07)}
 @media(max-width:650px){.forge-ai-code-beta .forge-ai-main-submit{font-size:13px}}
+
+/* Public AI guest access: no shared passwords in visitors' browsers. */
+.forge-public-access{padding:15px;border:1px solid #76b9ae;background:#1a494b;border-radius:12px;color:#e4fff7;margin:10px 0}
+.forge-public-access>strong{display:block;color:#9cf9e2;font-size:13px;font-weight:800}
+.forge-public-access>p{font-size:11px;line-height:1.6;color:#c5e1d8;margin:8px 0 12px}
+.forge-turnstile{min-height:64px;max-width:100%;overflow:visible}
+.forge-turnstile p{color:#ffe3b2;font-size:11px;margin:8px 0}
