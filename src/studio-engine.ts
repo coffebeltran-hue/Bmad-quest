@@ -90,3 +90,46 @@ export function buildConversation(
  });
  return messages;
 }
+
+export type ReplayFocus = 'wireframe'|'hero'|'catalog'|'filters'|'checkout'|'feedback';
+export type ReplayFrame = {
+ completed: number; stage: number; progress: number; focus: ReplayFocus;
+ speaker: StudioSpeaker; task: string; file: string; activity: string;
+};
+/**
+ * Read-only reconstruction of the visual build from chat messages.
+ * The actual saved game and its progress are never mutated during playback.
+ */
+export function replayFrame(messages:readonly StudioMessage[],shown:number):ReplayFrame {
+ const count=Number.isFinite(shown)?Math.max(0,Math.min(messages.length,Math.floor(shown))):messages.length;
+ const visible=messages.slice(0,count);
+ const completed=visible.filter(m=>/^m-\d+-response$/.test(m.id)).length;
+ const released=visible.filter(m=>/^m-\d+-version$/.test(m.id)).length;
+ const stage=Math.min(6,released);
+ const last=visible[visible.length-1];
+ const phase=(last?.phase||'Inicio').toLowerCase();
+ let focus:ReplayFocus=stage===0?'wireframe':'hero';
+ if(stage>=2 && (phase.includes('prd')||phase.includes('mvp')||phase.includes('ticket')||phase.includes('plan')||phase.includes('arquitect')))focus='catalog';
+ if(stage>=3 && (phase.includes('ux')||phase.includes('acces')||phase.includes('usabil')||phase.includes('diseñ')))focus='filters';
+ if(stage>=4 && (phase.includes('debug')||phase.includes('qa')||phase.includes('review')||phase.includes('valid')||phase.includes('party')))focus='checkout';
+ if(stage>=5 && (phase.includes('feedback')||phase.includes('retrospect')||phase.includes('beta')))focus='feedback';
+ if(last?.kind==='milestone'){
+  focus=(['wireframe','hero','catalog','filters','checkout','feedback','feedback'] as const)[stage];
+ }
+ const targets:Record<ReplayFocus,{task:string;file:string;activity:string}>={
+  wireframe:{task:'Planificando la estructura de la página',file:'design/wireframe',activity:'Dibujando bloques, estructura y flujo de usuario'},
+  hero:{task:'Diseñando identidad y portada',file:'components/Hero.tsx',activity:'Aplicando marca, colores y sección principal'},
+  catalog:{task:'Armando el catálogo de servicios',file:'components/Catalog.tsx',activity:'Preparando tarjetas y contenido del producto'},
+  filters:{task:'Mejorando la experiencia de búsqueda',file:'components/Search.tsx',activity:'Añadiendo navegación, búsqueda y filtros'},
+  checkout:{task:'Conectando las interacciones',file:'components/Flow.tsx',activity:'Preparando selección y confirmación simulada'},
+  feedback:{task:'Probando y puliendo la página',file:'components/Feedback.tsx',activity:'Revisando detalles y experiencia final'}
+ };
+ const target=targets[focus];
+ return {
+  completed,stage,progress:studioPercent(completed),focus,
+  speaker:last?.speaker||'Mary',
+  task:last?.kind==='milestone'?'Entregado: '+RELEASES[stage].name:target.task,
+  file:target.file,
+  activity:last?.kind==='decision'?'Revisando la elección del fundador en el prototipo':target.activity
+ };
+}

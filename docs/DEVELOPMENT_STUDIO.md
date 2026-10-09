@@ -27,3 +27,16 @@ Las decisiones del juego ya se guardan en localStorage. El Estudio reconstruye l
 ## Futuro
 
 Agregar decisiones que modifiquen directamente los contenidos y colores del prototipo, escenas entre agentes más complejas y un exportador de la web simulada. No presentar generación de código autónoma hasta integrar un entorno real y seguro.
+
+## Reproducir la construcción paso a paso
+
+El botón **Reproducir obra** en el chat (o **↻** en el navegador de demostración) inicia una reconstrucción **visual y de solo lectura**. Los mensajes aparecen uno a uno, en orden histórico, y el panel derecho:
+- Empieza en el wireframe y recupera cada fase liberada cuando Amelia anuncia la entrega.
+- Muestra un estado de trabajo con el agente que habla, la parte visual afectada y un archivo ilustrativo.
+- Resalta en la página la portada, catálogo, filtros, flujo o feedback según la etapa disponible.
+- Actualiza el porcentaje temporal de la reproducción misión a misión sin alterar el progreso real guardado.
+- Permite pausar/continuar, reiniciar, cambiar velocidad o terminar la reproducción.
+
+También se puede elegir una versión de forma manual para salir de la reproducción y volver a probar los controles.
+
+**Limitación explícita:** la historia del chat representa decisiones reales de la partida, pero no hay un motor que escriba código fuente en segundo plano. La reconstrucción visual es una simulación determinista del trabajo de los agentes; el prototipo React sí existe y es interactivo.
