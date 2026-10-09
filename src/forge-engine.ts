@@ -24,9 +24,12 @@ export function interpretIdea(value:string):ForgeResult {
  const prompt=value.trim().replace(/\s+/g,' ').slice(0,400);
  if(prompt.length<12)return {project:null,error:'Describe tu idea en una frase un poco más detallada.'};
  if(dangerous.test(prompt))return {project:null,error:'Esa idea no se puede crear en este estudio.'};
- const match=recognizers.find(r=>r.pattern.test(prompt));
+ const generic=planUniversal(prompt);
+ // A concrete tool intent wins over incidental context such as "calculadora para mi tienda".
+ const prefersCustom=['calculator','timer','flashcards','journal','goals','dashboard'].includes(generic.mode);
+ const match=prefersCustom?undefined:recognizers.find(r=>r.pattern.test(prompt));
  if(!match){
-  const blueprint=planUniversal(prompt);
+  const blueprint=generic;
   return {project:{kind:'custom',prompt,title:blueprint.title,summary:'Prototipo funcional básico adaptado a tu idea. '+blueprint.caveat,mode:'prompt',blueprint,source:'local'},error:''};
  }
  return {project:{kind:match.kind,prompt,title:match.title,summary:match.summary,mode:'prompt'},error:''};
