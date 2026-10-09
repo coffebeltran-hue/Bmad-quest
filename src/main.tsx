@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import{createRoot}from'react-dom/client';
 import './style.css';
+import StudioView from './Studio';
 import {applyCreditDelta, canAfford, canRequestFunding, fundEmergency, MISSION_COSTS, PARTY_COSTS} from './economy';
 type Choice={label:string;note:string;delta:[number,number,number]};
 type Mission={title:string;topic:string;lead:string;brief:string;question:string;choices:[Choice,Choice]};
@@ -61,7 +62,7 @@ function CharacterArt({name,variant='portrait'}:{name:string;variant?:'portrait'
 }
 function App(){
  const [save,setSave]=useState<Save|null>(load);
- const [screen,setScreen]=useState<'home'|'game'|'academy'|'party'|'report'>('home');
+ const [screen,setScreen]=useState<'home'|'game'|'academy'|'party'|'studio'|'report'>('home');
  const [founder,setFounder]=useState('Fundador/a');
  const [startup,setStartup]=useState(0);
  const [showNew,setShowNew]=useState(false);
@@ -73,7 +74,7 @@ function App(){
  const progress=save?Math.round(save.index/missions.length*100):0;
  const currentAgent=mission?.lead==='Todos'?'Mary':mission?.lead||'Mary';
  useEffect(()=>{if(save)localStorage.setItem(key,JSON.stringify(save));else localStorage.removeItem(key)},[save]);
- function navigate(to:'home'|'game'|'academy'|'party'|'report'){
+ function navigate(to:'home'|'game'|'academy'|'party'|'studio'|'report'){
    setFeedback('');setScreen(to);window.scrollTo({top:0,behavior:'smooth'});
  }
  function begin(){
@@ -152,6 +153,7 @@ function App(){
       <button className={screen==='home'?'active':''} onClick={()=>navigate('home')}>Inicio</button>
       <button className={screen==='academy'?'active':''} onClick={()=>navigate('academy')}>Academia</button>
       <button disabled={!save} className={screen==='party'?'active':''} onClick={()=>navigate('party')}>◈ Party Mode</button>
+      <button disabled={!save} className={screen==='studio'?'active':''} onClick={()=>navigate('studio')}>▣ Estudio</button>
     </nav>
     <div className="nav-actions">
       {save?<button className="header-play" onClick={()=>navigate('game')}>Mi startup <span>↗</span></button>:<button className="header-play" onClick={()=>setShowNew(true)}>Jugar ahora <span>↗</span></button>}
@@ -213,13 +215,14 @@ function App(){
         <div className="hub-visual">
          <div className="hub-back-grid"/>
          <div className="hub-neon">BMAD<span>QUEST</span></div>
-         <div className="hub-desk"><div className="hub-monitor"><span>✦</span><small>BUILD YOUR FUTURE</small></div><div className="hub-monitor-base"/></div>
+         <div className="hub-desk"><button className="hub-monitor" type="button" onClick={()=>navigate('studio')} title="Abrir el estudio y probar la web de tu startup"><span>✦</span><small>VER SITIO WEB ↗</small></button><div className="hub-monitor-base"/></div>
          <div className="hub-furniture left"/><div className="hub-furniture right"/>
          <button className="hub-character hub-first" title="Ir a Party Mode" onClick={()=>navigate('party')}><CharacterArt name="John" variant="mini"/><span>PARTY MODE ↗</span></button>
          <button className="hub-character hub-second" title="Ver academia" onClick={()=>navigate('academy')}><CharacterArt name="Sally" variant="mini"/><span>ACADEMIA ↗</span></button>
          <button className="hub-character hub-third" title="Jugar misión" onClick={()=>document.getElementById('mission-panel')?.scrollIntoView({behavior:'smooth'})}><CharacterArt name="Amelia" variant="mini"/><span>MISIONES ↓</span></button>
         </div>
         <div className="hub-footer"><span>✳ EQUIPO ACTIVO <b>5/5 AGENTES</b></span><span>◉ SIGUIENTE OBJETIVO <b>{mission?.title||'Campaña completada'}</b></span></div>
+        <button type="button" className="hub-studio-link" onClick={()=>navigate('studio')}><span>▣ ESTUDIO DE DESARROLLO</span><strong>Ver las conversaciones y el progreso de nuestra web →</strong><small>Vista previa interactiva · Se actualiza cada 3 misiones</small></button>
        </div>
        <article id="mission-panel" className="mission-panel">
         {mission?<><div className="mission-banner"><div><span className="section-kicker">CAPÍTULO {chapter+1} · MISIÓN {save.index+1} DE 18</span><h2>{feedback?'¡Misión superada!':mission.title}</h2><span className="concept-chip">✦ {mission.topic}</span></div><CharacterArt name={currentAgent} variant="mini"/></div>
@@ -231,6 +234,7 @@ function App(){
       <aside className="quest-side"><div className="quest-map"><div className="side-heading"><span>MAPA DE LA AVENTURA</span><b>{progress}%</b></div><div className="progress-track"><i style={{width:progress+'%'}}/></div>{chapters.map((title,i)=><div key={title} className={'quest-node '+(i===chapter?'current ':'')+(i<chapter?'complete ':'')+(i>chapter?'locked':'')}><div className="node-index">{i<chapter?'✓':('0'+(i+1))}</div><div><strong>{title}</strong><small>{i<chapter?'Completado':i===chapter?'En progreso':'Por desbloquear'}</small></div>{i===chapter&&<span className="playing-dot"/>}</div>)}</div><div className="party-teaser"><span>◈ PARTY MODE</span><h3>Las mejores ideas se debaten.</h3><p>Reúne a los agentes, escucha argumentos y decide.</p><button onClick={()=>navigate('party')}>Entrar a la sala ↗</button></div></aside>
      </div>
    </div>}
+   {save&&screen==='studio'&&<StudioView save={save} missions={missions} debates={debates} onBack={()=>navigate('game')}/>}
    {save&&screen==='party'&&<div className="screen-in party-screen"><div className="game-topline"><span>◈ SALA DE REUNIONES</span><span>{save.party.length} / 8 DEBATES TERMINADOS</span></div>
      <div className="game-heading"><div><span className="section-kicker">✦ THINK TOGETHER</span><h1>Welcome to <em>Party Mode.</em></h1><p>Cinco mentes. Distintas perspectivas. La última palabra siempre es tuya.</p></div><button className="btn-ghost" onClick={()=>navigate('game')}>← Volver a la oficina</button></div>
      <div className="party-workspace">

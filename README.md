@@ -8,6 +8,17 @@ Videojuego educativo **no oficial** inspirado en BMAD Method. Administra una sta
 
 > Es un punto de partida. Los minijuegos independientes, oficina completamente explorable, ilustraciones avanzadas y pruebas E2E siguen pendientes.
 
+## Estudio de Desarrollo (nueva función)
+
+En la partida se puede abrir **Estudio** desde el menú o el monitor de la oficina. Tiene un chat ficticio con mensajes de Mary, John, Sally, Winston y Amelia vinculados a las decisiones guardadas, además de una página React interactiva de la startup elegida.
+
+- Progreso de construcción calculado a partir de las 18 misiones.
+- Siete versiones: boceto, identidad, oferta, UX, interactividad, beta y lanzamiento; cada tres misiones se desbloquea una fase.
+- Vista previa contextual para EduConnect, FoodFlow y BookEasy.
+- Controles visuales de navegación, catálogo, búsqueda, filtros, selección y confirmación de demo.
+- No hay transacciones reales, backend ni agentes IA generando código automáticamente: las conversaciones son una dramatización educativa, y el prototipo existe como código React del juego.
+- Pruebas deterministas del motor de progresión y transcripción en `tests/studio.test.mjs`.
+
 ## Desarrollo
 
 Requiere Node.js 22+.
