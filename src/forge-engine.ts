@@ -1,6 +1,6 @@
 import {planUniversal} from './universal-engine.ts';
 import type {UniversalBlueprint} from './universal-engine.ts';
-export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe'|'custom';
+export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe'|'roulette'|'custom';
 export type ForgeProject = {kind:ForgeKind;prompt:string;title:string;summary:string;mode:'prompt';blueprint?:UniversalBlueprint;source?:'local'|'ai'};
 export type ForgeResult = {project:ForgeProject|null;error:string};
 export const FORGE_START_CREDITS = 250;
@@ -12,6 +12,7 @@ export const GIGS = [
  {id:'design',title:'Diseño express',detail:'Preparar recursos de identidad visual',pay:30,icon:'✦'}
 ] as const;
 const recognizers:{kind:ForgeKind;pattern:RegExp;title:string;summary:string}[]=[
+ {kind:'roulette',pattern:/ruleta|roulette|rueda\s+(?:del?\s+)?casino/i,title:'Roulette Royal',summary:'Ruleta europea visual de 37 números, giros animados y resultados con fichas ficticias.'},
  {kind:'blackjack',pattern:/\bblack\s*jack\b|\bveintiuno\b|\b21\s*cartas\b/i,title:'Blackjack Arena',summary:'Juego de 21 con crupier virtual, cartas y lógica real.'},
  {kind:'tictactoe',pattern:/tres\s+en\s+raya|triqui|tic.?tac.?toe|gato\s+(?:juego|de)/i,title:'Tres en Raya',summary:'Tablero interactivo para jugar contra un rival automático.'},
  {kind:'quiz',pattern:/trivia|cuestionario|examen|preguntas|quiz|test\s+de\s+/i,title:'Quiz Master',summary:'Trivia interactiva con preguntas, opciones y puntuación.'},
@@ -29,6 +30,9 @@ export function interpretIdea(value:string):ForgeResult {
  const prefersCustom=['calculator','timer','flashcards','journal','goals','dashboard'].includes(generic.mode);
  const match=prefersCustom?undefined:recognizers.find(r=>r.pattern.test(prompt));
  if(!match){
+  if(generic.mode==='game'||/casino|tragamonedas|tragaperra|p[oó]ker|baccarat|dados/i.test(prompt)){
+   return {project:null,error:'Entendí que solicitas un juego, pero todavía no está implementada esa mecánica. Puedo crear blackjack, ruleta europea, triqui o trivia. No voy a sustituir tu juego por un formulario y decir que está terminado.'};
+  }
   const blueprint=generic;
   return {project:{kind:'custom',prompt,title:blueprint.title,summary:'Prototipo funcional básico adaptado a tu idea. '+blueprint.caveat,mode:'prompt',blueprint,source:'local'},error:''};
  }

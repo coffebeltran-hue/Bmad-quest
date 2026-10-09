@@ -38,3 +38,32 @@ test.after(()=>{
  if(oldKey===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=oldKey;
  if(oldCode===undefined)delete process.env.FORGE_BETA_CODE;else process.env.FORGE_BETA_CODE=oldCode;
 });
+
+test('AI endpoint chooses the specialized roulette renderer instead of records or generic game',async()=>{
+ process.env.OPENAI_API_KEY='fake';process.env.FORGE_BETA_CODE='beta-test';
+ const previous=globalThis.fetch;
+ globalThis.fetch=async()=>Response.json({output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({
+  mode:'game',title:'Juego de ruleta',description:'Una ruleta virtual',entity:'giro',
+  action:'Girar',fieldLabel:'Resultado',tags:['Todos'],primaryColor:'#116b4c',
+  capabilities:['Puntos','Rondas'],caveat:'Sin apuestas de dinero real.'
+ })}]}]});
+ try{
+  const res=await POST(make('Quiero una app como la ruleta en los casinos'));
+  const parsed=await res.json();
+  assert.equal(res.status,200);
+  assert.equal(parsed.project.kind,'roulette');
+  assert.equal(parsed.project.source,'ai');
+  assert.equal(parsed.project.blueprint,undefined);
+ }finally{globalThis.fetch=previous}
+});
+test('AI endpoint rejects unsupported casino mechanics before model costs',async()=>{
+ process.env.OPENAI_API_KEY='fake';process.env.FORGE_BETA_CODE='beta-test';
+ const previous=globalThis.fetch;
+ let called=0;
+ globalThis.fetch=async()=>{called++;return Response.json({})};
+ try{
+  const res=await POST(make('Quiero un casino con máquinas tragamonedas'));
+  assert.equal(res.status,422);
+  assert.equal(called,0);
+ }finally{globalThis.fetch=previous}
+});

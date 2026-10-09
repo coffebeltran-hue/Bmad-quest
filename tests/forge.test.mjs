@@ -50,3 +50,20 @@ test('custom prompts create individualized functional plans instead of rejecting
  assert.equal(output[0]?.kind,'custom');
  assert.notEqual(output[0]?.title,output[1]?.title);
 });
+
+test('a roulette request is never silently converted to a records form',()=>{
+ for(const phrase of [
+   'Quiero una app que sirva como la ruleta en los casinos',
+   'Me haces una ruleta de casino que pueda girar con fichas',
+   'Build a roulette wheel game with virtual tokens'
+ ]){
+  const answer=interpretIdea(phrase);
+  assert.equal(answer.project?.kind,'roulette',phrase);
+  assert.ok(answer.project?.summary.includes('37 números'));
+ }
+});
+test('unknown casino game is rejected instead of a fake fully functional app',()=>{
+ const x=interpretIdea('Quiero un casino con máquinas tragamonedas');
+ assert.equal(x.project,null);
+ assert.match(x.error,/no.*sustituir|no.*formulario|no.*juego/i);
+});

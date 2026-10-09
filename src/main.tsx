@@ -55,8 +55,11 @@ function load():Save|null {
     !Number.isFinite(x.quality) || !Number.isFinite(x.insight) ||
     !Array.isArray(x.log) || !Array.isArray(x.party)) return null;
   const saved=x.project;
-  const cached=saved?.source==='ai'&&saved?.kind==='custom'&&
-    typeof saved.prompt==='string'&&typeof saved.title==='string'&&validateBlueprint(saved.blueprint);
+  const cached=saved?.source==='ai'&&typeof saved.prompt==='string'&&
+    typeof saved.title==='string'&&(
+     (saved.kind==='custom'&&validateBlueprint(saved.blueprint))||
+     (['roulette','blackjack','quiz','tasks','tictactoe','booking','shop'].includes(saved.kind))
+    );
   const blueprint=cached?saved:(x.mode==='prompt'&&saved&&typeof saved.prompt==='string'?interpretIdea(saved.prompt).project:null);
   return {...x,mode:blueprint?'prompt':'preset',project:blueprint||undefined,
     fundingUsed:Array.isArray(x.fundingUsed)?x.fundingUsed.filter((id:unknown)=>typeof id==='string'):[],
@@ -113,9 +116,11 @@ function App(){
      const payload=await response.json();
      if(!response.ok)throw Error(typeof payload.error==='string'?payload.error:'Servicio de IA no disponible.');
      const project=payload.project;
-     const safe=project?.kind==='custom'&&project?.mode==='prompt'&&
-       project?.source==='ai'&&typeof project?.title==='string'&&
-       project.prompt===prompt.trim()&&validateBlueprint(project.blueprint);
+     const supportedKind=project?.kind==='custom'?
+       !!validateBlueprint(project.blueprint):
+       ['roulette','blackjack','quiz','tasks','tictactoe','booking','shop'].includes(project?.kind);
+     const safe=project?.mode==='prompt'&&project?.source==='ai'&&
+       typeof project?.title==='string'&&project.prompt===prompt.trim()&&supportedKind;
      if(!safe)throw Error('La respuesta de IA no superó la validación.');
      setSave({...initial(0,founder),mode:'prompt',project,credits:FORGE_START_CREDITS});
      setScreen('studio');setShowNew(false);setFeedback('');
@@ -273,7 +278,7 @@ function App(){
  </div>:<div className="forge-ai-unavailable">
   <strong>IA generativa no activada</strong>
   <p>El constructor local funciona ya. Para habilitar la generación asistida hace falta desplegar la API de Vercel y enlazar su URL.</p>
- </div>}</>}<button className="btn-main modal-go" onClick={begin} disabled={creationMode==='prompt'&&!analyzedIdea.project}>{creationMode==='prompt'?'Crear y probar mi app →':'Fundar mi startup →'}</button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
+ </div>}</>}<button className="btn-main modal-go" onClick={begin} disabled={creationMode==='prompt'&&!analyzedIdea.project}>{creationMode==='prompt'?(analyzedIdea.project?.kind==='custom'?'Crear prototipo básico →':'Crear y jugar mi app →'):'Fundar mi startup →'}</button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
       {save&&screen==='game'&&<div className="screen-in play-screen">
      <div className="game-topline"><span>◈ CENTRO DE OPERACIONES</span><span>PARTIDA GUARDADA AUTOMÁTICAMENTE <i className="signal-dot"/></span></div>
      <div className="game-heading"><div><span className="section-kicker">HOLA, {save.founder.toUpperCase()}</span><h1>Tu startup, <em>tu historia.</em></h1><p>{save.mode==='prompt'&&save.project?save.project.title+' · Construido desde tu instrucción':startups[save.startup][0]+' · '+startups[save.startup][1]}</p></div><div className="level-gem"><span>✦</span><div><small>RANGO ACTUAL</small><b>LEVEL {1+Math.floor(save.index/3)}</b></div></div></div>

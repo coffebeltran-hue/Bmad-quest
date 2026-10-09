@@ -16,6 +16,7 @@ export const BUILD_STAGES=[
 ] as const;
 type Script={noun:string;parts:string;features:string;logic:string;test:string;file:string};
 const scripts:Record<ForgeKind,Script>={
+ roulette:{noun:'ruleta europea',parts:'mesa verde, rueda circular numerada y fichas de juego',features:'37 casillas de colores, marcador, apuestas ficticias y botón de giro',logic:'selección de un número aleatorio entre 0 y 36, giros, cálculo de color, paridad y resultados con puntos virtuales',test:'el cero es verde y las fichas virtuales no pueden gastarse por debajo del saldo',file:'src/roulette.ts'},
  blackjack:{noun:'mesa de blackjack',parts:'tapete verde, borde de madera y zona del crupier',features:'cartas, manos y marcador de 21',logic:'baraja, ases de 1 u 11, pedir carta y plantarse',test:'la banca roba hasta 17 y las manos se comparan correctamente',file:'src/blackjack.ts'},
  quiz:{noun:'trivia',parts:'panel del desafío y tarjeta de pregunta',features:'opciones, preguntas y marcador de aciertos',logic:'selección de respuestas y validación de puntos',test:'las respuestas correctas suman puntos y se puede reiniciar',file:'src/ForgeWidgets.tsx'},
  tasks:{noun:'gestor de tareas',parts:'espacio de productividad y encabezado',features:'campo para tareas, filtros y lista',logic:'añadir, marcar, priorizar y borrar elementos',test:'los filtros muestran las tareas correctas sin perder datos',file:'src/ForgeWidgets.tsx'},

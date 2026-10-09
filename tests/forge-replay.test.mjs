@@ -4,13 +4,14 @@ import {interpretIdea} from '../src/forge-engine.ts';
 import {BUILD_STAGES,buildForgeScript,forgeFrame} from '../src/forge-replay.ts';
 const prompts=[
  'Quiero jugar blackjack contra un crupier virtual',
+ 'Quiero una ruleta de casino con fichas virtuales',
  'Crea un juego de tres en raya contra la computadora',
  'Necesito una trivia con preguntas y respuestas',
  'Quiero una lista de tareas pendientes',
  'Necesito una agenda para reservar citas',
  'Quiero una tienda con productos y carrito'
 ];
-test('all six instruction-app engines receive distinct seven-step build sequences',()=>{
+test('all supported instruction-app engines receive distinct seven-step build sequences',()=>{
  for(const prompt of prompts){
   const project=interpretIdea(prompt).project;
   assert.ok(project, prompt);

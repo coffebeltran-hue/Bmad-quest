@@ -298,3 +298,18 @@
 .forge-ai-beta button{margin-top:13px;padding:13px 16px;background:#84e7d5;color:#133a43;border:0;border-radius:10px;font-size:12px;font-weight:800}
 .forge-ai-beta button:disabled{opacity:.5;cursor:not-allowed}
 .forge-ai-beta .forge-ai-error{background:#612e40;border:1px solid #e0889f;border-radius:8px;padding:9px;color:#ffe1e8;font-size:11px}
+
+/* Ruleta: el renderizador muestra las piezas según la fase del guion BMAD. */
+.forge-build-frame.phase-1 .roulette-topbar,
+.forge-build-frame.phase-1 .roulette-wheel,
+.forge-build-frame.phase-1 .roulette-pointer,
+.forge-build-frame.phase-1 .roulette-result-slot,
+.forge-build-frame.phase-1 .roulette-controls{display:none}
+.forge-build-frame.phase-2 .roulette-result-slot,
+.forge-build-frame.phase-2 .roulette-controls{display:none}
+.forge-build-frame.phase-3 .roulette-controls{display:none}
+.forge-build-frame.phase-4 .roulette-spin-button,
+.forge-build-frame.phase-4 .roulette-history,
+.forge-build-frame.phase-4 .roulette-disclaimer{display:none}
+.forge-build-frame.phase-5 .roulette-history,
+.forge-build-frame.phase-5 .roulette-disclaimer{display:none}

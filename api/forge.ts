@@ -5,6 +5,7 @@
  */
 import {timingSafeEqual} from 'node:crypto';
 import {validateBlueprint} from '../src/universal-engine.ts';
+import {interpretIdea} from '../src/forge-engine.ts';
 
 const schema={
  type:'object',
@@ -86,6 +87,8 @@ export async function POST(req:Request):Promise<Response>{
   prompt=payload.prompt.trim();
  }catch {return reply({error:'Cuerpo inválido.'},400,origin)}
  if(prompt.length<12||prompt.length>400)return reply({error:'Describe tu idea en 12 a 400 caracteres.'},400,origin);
+ const localInterpretation=interpretIdea(prompt);
+ if(!localInterpretation.project)return reply({error:localInterpretation.error},422,origin);
  const model=process.env.OPENAI_FORGE_MODEL||'gpt-5-mini';
  try{
   const response=await fetch('https://api.openai.com/v1/responses',{
@@ -119,6 +122,11 @@ export async function POST(req:Request):Promise<Response>{
   try{candidate=JSON.parse(text)}catch{return reply({error:'Respuesta no válida del modelo.'},502,origin)}
   const plan=validateBlueprint(candidate);
   if(!plan)return reply({error:'El plan no pasó la validación de seguridad.'},502,origin);
+  // The model helps interpret the brief; supported specialist engines override generic UI.
+  // This prevents e.g. a request for roulette being rendered as a form or generic quiz.
+  if(localInterpretation.project.kind!=='custom'){
+   return reply({project:{...localInterpretation.project,source:'ai'}},200,origin);
+  }
   // Do not trust AI-supplied capabilities: only show actions the runtime actually implements.
   const clean={
    ...plan,

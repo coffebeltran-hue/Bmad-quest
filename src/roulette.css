@@ -1,0 +1,49 @@
+/* Roulette Royal · original casino-inspired frontend, virtual scores only */
+.roulette-app{color:#f9f0d6;background:#0d1720;min-height:630px}
+.roulette-topbar{background:linear-gradient(110deg,#152c2c,#15232a);padding:19px 23px;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:2px solid #c9a160}
+.roulette-live{color:#84e0b4;font-size:9px;font-weight:800;letter-spacing:1.2px}
+.roulette-topbar h2{font:800 clamp(21px,3vw,30px) 'Space Grotesk',sans-serif;margin:5px 0 2px;letter-spacing:1px}
+.roulette-topbar h2 em{font-style:normal;color:#eaca84}.roulette-topbar small{font-size:9px;color:#9eb8ab;letter-spacing:.7px}
+.roulette-balance{text-align:right}.roulette-balance small{display:block;font-size:9px;color:#b3b9ac;font-weight:800}.roulette-balance strong{font:800 30px 'Space Grotesk';color:#f8e2a5}.roulette-balance strong span{color:#d3ab60;font-size:14px}
+.roulette-felt{background:radial-gradient(ellipse at 50% 37%,#17744c 0%,#095136 58%,#063324 95%);border-bottom:13px solid #8c552a;box-shadow:inset 0 0 60px #001d16;padding:20px;position:relative}
+.roulette-felt:before{content:'';pointer-events:none;position:absolute;inset:8px;border:2px solid #dac0833d;border-radius:15px 15px 100px 100px}
+.roulette-table-heading{display:flex;flex-direction:column;align-items:center;gap:6px;color:#e4c687;font:800 13px 'Space Grotesk';letter-spacing:3px;text-align:center;position:relative;z-index:1}
+.roulette-table-heading small{font-size:8px;letter-spacing:1px;color:#a5d4bd}
+.roulette-wheel-frame{width:min(410px,94%);aspect-ratio:1;position:relative;margin:11px auto 10px;background:radial-gradient(circle,#b79555 58%,#473a28 62%,#d6b575 65%,#271914 68%,transparent 68%);padding:12px;border-radius:50%;filter:drop-shadow(0 13px 20px #00150ea0)}
+.roulette-wheel{display:block;width:100%;height:100%;border-radius:50%;transform-origin:center;filter:drop-shadow(0 8px 12px #002b1f85)}
+.roulette-pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:4;color:#f3e7c3;font-size:27px;text-shadow:0 3px 7px #05251b;filter:drop-shadow(0 2px #625027)}
+.roulette-result-slot{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:11px;flex-wrap:wrap;min-height:54px;margin:auto;color:#f5e5b8;font-size:12px;font-weight:800;letter-spacing:.7px;text-align:center}
+.roulette-result-slot>span:not(.roulette-winning-ball):not(.roulette-loading){color:#ead18a}
+.roulette-loading{height:20px;width:20px;border:3px solid #8fc9ab;border-top-color:#ffe4b8;border-radius:50%;animation:rouletteBusy 1s linear infinite}
+@keyframes rouletteBusy{to{transform:rotate(360deg)}}
+.roulette-winning-ball{display:inline-grid;place-items:center;flex:none;min-width:35px;height:35px;border:2px solid #ebd9b6;color:white;border-radius:50%;font:800 13px 'Space Grotesk';box-shadow:0 4px 8px #0007,inset 0 1px #fff4}
+.roulette-winning-ball.red{background:#c12f4b}.roulette-winning-ball.black{background:#17202f}.roulette-winning-ball.green{background:#087d5c}
+.roulette-controls{padding:23px;background:#132229}
+.roulette-control-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:4px 0 16px}
+.roulette-control-heading>div small{display:block;color:#a7c9b3;letter-spacing:1px;font-weight:800;font-size:9px;margin-bottom:6px}
+.roulette-control-heading strong{font:800 17px 'Space Grotesk'}.roulette-control-heading>span{font-size:9px;font-weight:800;color:#aab6a4;letter-spacing:.5px;text-align:right}
+.roulette-bet-buttons{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:22px}
+.roulette-bet{border:1px solid #6c7871;color:#ebe2cf;padding:13px 4px;border-radius:10px;background:#223338;font-size:10px;font-weight:800;transition:transform .2s,border-color .2s,background .2s}
+.roulette-bet.red{background:#6d293a;border-color:#a85b67}.roulette-bet.black{background:#151c2a}.roulette-bet.selected{outline:2px solid #e9ca82;outline-offset:2px;box-shadow:0 8px 20px #0007;color:#fff8db}
+.roulette-bet:not(:disabled):hover{transform:translateY(-3px);border-color:#eac480}.roulette-bet:disabled{opacity:.5}
+.roulette-number-picker{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#dbebd6;margin:-6px 0 20px;font-size:11px;font-weight:800}
+.roulette-number-picker select{background:#1e3336;color:#fce5b2;border:1px solid #7d9a82;border-radius:10px;padding:11px;max-width:170px}
+.roulette-stakes{display:flex;gap:13px;align-items:center;justify-content:center;margin:8px 0 22px}
+.roulette-stake{height:65px;width:65px;flex:none;display:grid;place-items:center;border:7px dashed #f0e3b1;border-radius:50%;background:#ba384c;color:white;font:800 17px 'Space Grotesk';box-shadow:0 5px 0 #561e29,0 11px 20px #010e15b7,inset 0 0 0 2px #ffffff7c;transition:transform .2s}
+.roulette-stake.chip-1{background:#2856b8;box-shadow:0 5px 0 #142d68,0 11px 20px #010e15b7,inset 0 0 0 2px #ffffff7c}
+.roulette-stake.chip-2{background:#8046bc;box-shadow:0 5px 0 #401e65,0 11px 20px #010e15b7,inset 0 0 0 2px #ffffff7c}
+.roulette-stake.chip-3{background:#bc8e34;box-shadow:0 5px 0 #5c3d15,0 11px 20px #010e15b7,inset 0 0 0 2px #ffffff7c}
+.roulette-stake.active{outline:3px solid #a3f0d4;outline-offset:5px;transform:translateY(-4px)}
+.roulette-stake:disabled{filter:grayscale(.7);opacity:.35}
+.roulette-summary{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border:1px solid #52634f;border-radius:11px;padding:13px 16px;color:#a9c4b2;background:#172d2e;font-size:11px;margin-bottom:16px}
+.roulette-summary b{color:#f5e7bc}
+.roulette-spin-button{width:100%;border:1px solid #ebd698;background:linear-gradient(105deg,#f3d99f,#d5a962);border-radius:14px;padding:18px 12px;font:800 15px 'Space Grotesk';letter-spacing:1px;color:#3e2a17;box-shadow:inset 0 2px #fff9,0 7px 0 #79582e;cursor:pointer}
+.roulette-spin-button:not(:disabled):active{transform:translateY(5px);box-shadow:inset 0 2px #fff9,0 2px 0 #79582e}
+.roulette-spin-button:disabled{opacity:.5;cursor:not-allowed}
+.roulette-reset{margin:16px auto 5px;display:block;background:#294f40;color:#b5fbe1;border:1px solid #65b48b;border-radius:10px;padding:12px 18px;font-size:11px;font-weight:800}
+.roulette-history{border-top:1px solid #4c6659;margin-top:23px;padding-top:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.roulette-history strong{color:#a5c9b6;letter-spacing:1px;font-size:9px}.roulette-history>div{display:flex;gap:6px;flex-wrap:wrap}
+.roulette-history .roulette-winning-ball{height:27px;min-width:27px;font-size:10px;border-width:1px}
+.roulette-disclaimer{font-size:9px;line-height:1.7;color:#9fb5ad;text-align:center;margin:24px 5px 0}
+@media(max-width:650px){.roulette-topbar{padding:13px}.roulette-balance strong{font-size:24px}.roulette-felt{padding:15px 8px}.roulette-wheel-frame{width:min(355px,98%);padding:7px}.roulette-table-heading{font-size:11px}.roulette-controls{padding:15px}.roulette-bet-buttons{grid-template-columns:repeat(3,1fr)}.roulette-stakes{gap:7px}.roulette-stake{height:55px;width:55px;font-size:13px;border-width:6px}.roulette-control-heading>span{max-width:125px}.roulette-result-slot{font-size:10px}.roulette-topbar h2{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.roulette-loading{animation:none!important}}
