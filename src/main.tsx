@@ -4,6 +4,7 @@ import './style.css';
 import StudioView from './Studio';
 import ForgeApp from './ForgeApp';
 import type {ForgeProject} from './forge-engine';
+import {validateBlueprint} from './universal-engine';
 import {interpretIdea,FORGE_START_CREDITS,FORGE_MISSION_REWARD,FORGE_PARTY_REWARD,claimGig} from './forge-engine';
 import {applyCreditDelta, canAfford, canRequestFunding, fundEmergency, MISSION_COSTS, PARTY_COSTS} from './economy';
 type Choice={label:string;note:string;delta:[number,number,number]};
@@ -53,7 +54,10 @@ function load():Save|null {
     !Number.isFinite(x.credits) || x.credits<0 ||
     !Number.isFinite(x.quality) || !Number.isFinite(x.insight) ||
     !Array.isArray(x.log) || !Array.isArray(x.party)) return null;
-  const blueprint=x.mode==='prompt'&&x.project&&typeof x.project.prompt==='string'?interpretIdea(x.project.prompt).project:null;
+  const saved=x.project;
+  const cached=saved?.source==='ai'&&saved?.kind==='custom'&&
+    typeof saved.prompt==='string'&&typeof saved.title==='string'&&validateBlueprint(saved.blueprint);
+  const blueprint=cached?saved:(x.mode==='prompt'&&saved&&typeof saved.prompt==='string'?interpretIdea(saved.prompt).project:null);
   return {...x,mode:blueprint?'prompt':'preset',project:blueprint||undefined,
     fundingUsed:Array.isArray(x.fundingUsed)?x.fundingUsed.filter((id:unknown)=>typeof id==='string'):[],
     earned:Array.isArray(x.earned)?x.earned.filter((id:unknown)=>typeof id==='string'):[]};
@@ -74,6 +78,12 @@ function App(){
  const [showNew,setShowNew]=useState(false);
  const [creationMode,setCreationMode]=useState<'preset'|'prompt'>('preset');
  const [prompt,setPrompt]=useState('');
+ const [forgeBetaCode,setForgeBetaCode]=useState('');
+ const [generatingAI,setGeneratingAI]=useState(false);
+ const [aiError,setAiError]=useState('');
+ const forgeAPI=import.meta.env.VITE_FORGE_API_URL||(
+    window.location.hostname.endsWith('.vercel.app')?'/api/forge':''
+ );
  const [feedback,setFeedback]=useState('');
  const [selectedDebate,setSelectedDebate]=useState(0);
  const [term,setTerm]=useState('');
@@ -86,6 +96,34 @@ function App(){
    setFeedback('');setScreen(to);window.scrollTo({top:0,behavior:'smooth'});
  }
  const analyzedIdea=interpretIdea(prompt);
+ async function createWithAI(){
+   if(generatingAI||creationMode!=='prompt'||!forgeAPI)return;
+   if(prompt.trim().length<12||prompt.trim().length>400){
+     setAiError('Describe tu idea en 12 a 400 caracteres.');return;
+   }
+   if(!forgeBetaCode.trim()){setAiError('Escribe tu código de acceso beta.');return}
+   setGeneratingAI(true);setAiError('');
+   try{
+     const response=await fetch(forgeAPI,{
+       method:'POST',
+       headers:{'Content-Type':'application/json','X-Forge-Beta-Code':forgeBetaCode},
+       body:JSON.stringify({prompt:prompt.trim()}),
+       signal:AbortSignal.timeout(30000)
+     });
+     const payload=await response.json();
+     if(!response.ok)throw Error(typeof payload.error==='string'?payload.error:'Servicio de IA no disponible.');
+     const project=payload.project;
+     const safe=project?.kind==='custom'&&project?.mode==='prompt'&&
+       project?.source==='ai'&&typeof project?.title==='string'&&
+       project.prompt===prompt.trim()&&validateBlueprint(project.blueprint);
+     if(!safe)throw Error('La respuesta de IA no superó la validación.');
+     setSave({...initial(0,founder),mode:'prompt',project,credits:FORGE_START_CREDITS});
+     setScreen('studio');setShowNew(false);setFeedback('');
+     setForgeBetaCode('');window.scrollTo({top:0});
+   }catch(error){
+     setAiError(error instanceof Error?error.message:'No se pudo contactar con el generador.');
+   }finally{setGeneratingAI(false)}
+ }
  function begin(){
    if(creationMode==='prompt'){
      if(!analyzedIdea.project)return;
@@ -224,7 +262,18 @@ function App(){
     <section className="crew-section"><div className="feature-intro"><div><span className="section-kicker">CONOCE AL SQUAD</span><h2>No estás <em>solo.</em></h2></div><p>Cinco especialistas con talentos diferentes. Elige a quién escuchar… y cuándo.</p></div><div className="crew-grid">{agents.map((a,i)=><div className={'crew-card crew-'+a[3]} key={a[0]}><CharacterArt name={a[0]}/><div className="crew-copy"><span>AGENTE 0{i+1}</span><h3>{a[0]}</h3><small>{a[1]}</small></div></div>)}</div></section>
     <section className="cta-banner"><span>✦ EL FUTURO ESTÁ EN TUS MANOS</span><h2>¿Listo para crear algo grande?</h2><p>Tu historia empieza con una decisión.</p><button className="btn-main" onClick={()=>setShowNew(true)}>Empezar mi aventura <b>→</b></button></section>
    </div>}
-   {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}><section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in forge-start-modal"><button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button><span className="section-kicker">✦ CREA TU PROPIA AVENTURA</span><h2>¿Qué quieres <em>construir?</em></h2><p>Elige un proyecto preparado o describe uno con tus palabras para convertirlo en una app interactiva.</p><label htmlFor="founder">Nombre del fundador</label><input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/><div className="forge-mode-selector"><button className={creationMode==='preset'?'selected':''} onClick={()=>setCreationMode('preset')}><span>◈</span><strong>Proyecto predeterminado</strong><small>3 proyectos · Presupuesto inicial 100 CR</small></button><button className={creationMode==='prompt'?'selected':''} onClick={()=>setCreationMode('prompt')}><span>✦</span><strong>Crear por instrucción</strong><small>Ideas libres · Versión básica funcional · 250 CR</small></button></div>{creationMode==='preset'?<><div className="choose-label">ESCOGE TU STARTUP <span>100 CR INICIALES</span></div><div className="startup-choices">{startups.map((s,i)=><button key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div></>:<><label htmlFor="forge-instruction">Tu instrucción para los agentes</label><textarea id="forge-instruction" className="forge-prompt-field" maxLength={400} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Ejemplo: Quiero una app que me permita jugar blackjack contra un crupier virtual"/><div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Reservas','Necesito una app para reservar citas en una barbería'],['✦ Trivia','Quiero una trivia de preguntas de cultura general']].map(([name,text])=><button key={name} onClick={()=>setPrompt(text)}>{name}</button>)}</div>{prompt.trim().length>0&&<div className={'forge-interpretation '+(analyzedIdea.project?'recognized':'unsupported')}>{analyzedIdea.project?<><strong>✓ Motor encontrado: {analyzedIdea.project.title}</strong><p>{analyzedIdea.project.summary}</p></>:<p>{analyzedIdea.error}</p>}</div>}<small className="forge-model-note">El constructor interpreta ideas generales y crea una versión funcional básica con herramientas seguras. La generación de software arbitrario mediante IA todavía necesita un servidor.</small></>}<button className="btn-main modal-go" onClick={begin} disabled={creationMode==='prompt'&&!analyzedIdea.project}>{creationMode==='prompt'?'Crear y probar mi app →':'Fundar mi startup →'}</button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
+   {showNew&&<div className="modal-cover" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false)}}><section role="dialog" aria-modal="true" aria-label="Crear nueva partida" className="new-game-modal screen-in forge-start-modal"><button className="close-modal" onClick={()=>setShowNew(false)} aria-label="Cerrar">✕</button><span className="section-kicker">✦ CREA TU PROPIA AVENTURA</span><h2>¿Qué quieres <em>construir?</em></h2><p>Elige un proyecto preparado o describe uno con tus palabras para convertirlo en una app interactiva.</p><label htmlFor="founder">Nombre del fundador</label><input id="founder" maxLength={32} value={founder} onChange={e=>setFounder(e.target.value)} placeholder="Tu nombre"/><div className="forge-mode-selector"><button className={creationMode==='preset'?'selected':''} onClick={()=>setCreationMode('preset')}><span>◈</span><strong>Proyecto predeterminado</strong><small>3 proyectos · Presupuesto inicial 100 CR</small></button><button className={creationMode==='prompt'?'selected':''} onClick={()=>setCreationMode('prompt')}><span>✦</span><strong>Crear por instrucción</strong><small>Ideas libres · Versión básica funcional · 250 CR</small></button></div>{creationMode==='preset'?<><div className="choose-label">ESCOGE TU STARTUP <span>100 CR INICIALES</span></div><div className="startup-choices">{startups.map((s,i)=><button key={s[0]} className={'startup-option '+(startup===i?'picked':'')} onClick={()=>setStartup(i)} aria-pressed={startup===i}><span className="startup-symbol">{s[2]}</span><strong>{s[0]}</strong><small>{s[1]}</small><span className="selection-mark">{startup===i?'✓':'+'}</span></button>)}</div></>:<><label htmlFor="forge-instruction">Tu instrucción para los agentes</label><textarea id="forge-instruction" className="forge-prompt-field" maxLength={400} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Ejemplo: Quiero una app que me permita jugar blackjack contra un crupier virtual"/><div className="forge-prompt-examples"><span>Prueba una idea:</span>{[['♠ Blackjack','Quiero un juego de blackjack contra un crupier virtual'],['◈ Reservas','Necesito una app para reservar citas en una barbería'],['✦ Trivia','Quiero una trivia de preguntas de cultura general']].map(([name,text])=><button key={name} onClick={()=>setPrompt(text)}>{name}</button>)}</div>{prompt.trim().length>0&&<div className={'forge-interpretation '+(analyzedIdea.project?'recognized':'unsupported')}>{analyzedIdea.project?<><strong>✓ Motor encontrado: {analyzedIdea.project.title}</strong><p>{analyzedIdea.project.summary}</p></>:<p>{analyzedIdea.error}</p>}</div>}<small className="forge-model-note">Puedes crear ahora una versión local básica. Con un servidor de IA configurado, también puedes pedirle un plan personalizado; no se ejecuta código generado sin verificar.</small>
+ {forgeAPI?<div className="forge-ai-beta">
+  <strong>✦ Generación asistida por IA (beta privada)</strong>
+  <p>El servidor analiza tu idea y adapta el plano de la aplicación. Todavía usa componentes seguros y no crea cualquier software avanzado.</p>
+  <label htmlFor="forge-beta-code">Código de acceso a la beta</label>
+  <input id="forge-beta-code" type="password" value={forgeBetaCode} onChange={e=>setForgeBetaCode(e.target.value)} autoComplete="off" placeholder="Acceso configurado en Vercel"/>
+  <button type="button" disabled={generatingAI||prompt.trim().length<12||!forgeBetaCode.trim()} onClick={createWithAI}>{generatingAI?'Generando plano de la app…':'✦ Generar plan con IA →'}</button>
+  {aiError&&<p role="alert" className="forge-ai-error">{aiError}</p>}
+ </div>:<div className="forge-ai-unavailable">
+  <strong>IA generativa no activada</strong>
+  <p>El constructor local funciona ya. Para habilitar la generación asistida hace falta desplegar la API de Vercel y enlazar su URL.</p>
+ </div>}</>}<button className="btn-main modal-go" onClick={begin} disabled={creationMode==='prompt'&&!analyzedIdea.project}>{creationMode==='prompt'?'Crear y probar mi app →':'Fundar mi startup →'}</button>{save&&<small className="overwrite-note">Crear una nueva partida reemplazará el progreso actual.</small>}</section></div>}
       {save&&screen==='game'&&<div className="screen-in play-screen">
      <div className="game-topline"><span>◈ CENTRO DE OPERACIONES</span><span>PARTIDA GUARDADA AUTOMÁTICAMENTE <i className="signal-dot"/></span></div>
      <div className="game-heading"><div><span className="section-kicker">HOLA, {save.founder.toUpperCase()}</span><h1>Tu startup, <em>tu historia.</em></h1><p>{save.mode==='prompt'&&save.project?save.project.title+' · Construido desde tu instrucción':startups[save.startup][0]+' · '+startups[save.startup][1]}</p></div><div className="level-gem"><span>✦</span><div><small>RANGO ACTUAL</small><b>LEVEL {1+Math.floor(save.index/3)}</b></div></div></div>

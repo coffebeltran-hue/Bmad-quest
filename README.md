@@ -19,6 +19,14 @@ En la partida se puede abrir **Estudio** desde el menú o el monitor de la ofici
 - No hay transacciones reales, backend ni agentes IA generando código automáticamente: las conversaciones son una dramatización educativa, y el prototipo existe como código React del juego.
 - Pruebas deterministas del motor de progresión y transcripción en `tests/studio.test.mjs`.
 
+## IA generativa opcional (beta privada)
+
+El proyecto incluye un endpoint **`api/forge.ts`** pensado para Vercel que llama a OpenAI Responses API y devuelve un **esquema estructurado validado**, no código arbitrario. La app muestra el botón «Generar plan con IA» **solo cuando está configurada la URL del backend o se abre desde un despliegue en Vercel**. La app local y las seis plantillas tradicionales siguen disponibles sin API.
+
+Para la configuración del despliegue, las claves y los controles de acceso consulta [`docs/AI_VERCEL_SETUP.md`](docs/AI_VERCEL_SETUP.md). **Nunca publiques `OPENAI_API_KEY` ni `FORGE_BETA_CODE` en el frontend, `.env` versionado, la conversación o variables `VITE_*`.**
+
+La generación está acotada a nueve motores React verificados. No promete crear literalmente cualquier software: para scripts/plugins libres hace falta sandbox aislado, pruebas, control de costes y medidas de seguridad adicionales.
+
 ## App Forge — Crear por instrucción
 
 La pantalla **Nueva aventura** ofrece dos rutas:

@@ -289,3 +289,12 @@
 .forge-build-frame.phase-6 .universal-runtime{animation:uniLaunch .4s ease both}
 @keyframes uniLaunch{from{opacity:.7;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.forge-build-frame.phase-6 .universal-runtime{animation:none!important}}
+/* Optional server-backed AI planning: private beta only, independent of local Forge. */
+.forge-ai-beta,.forge-ai-unavailable{border:1px solid #647da2;background:linear-gradient(120deg,#222f53,#214852);border-radius:15px;padding:17px;margin:16px 0;color:#ecf5ff}
+.forge-ai-beta strong,.forge-ai-unavailable strong{font:800 14px 'Space Grotesk';color:#aefde9}
+.forge-ai-beta p,.forge-ai-unavailable p{font-size:11px;line-height:1.65;color:#b6cde0;margin:10px 0}
+.forge-ai-beta label{display:block;font-size:10px;color:#e1eafa;font-weight:800;margin:12px 0 6px}
+.forge-ai-beta input{display:block;width:100%;background:#141f3d;border:1px solid #7298ad;border-radius:9px;padding:12px;color:white}
+.forge-ai-beta button{margin-top:13px;padding:13px 16px;background:#84e7d5;color:#133a43;border:0;border-radius:10px;font-size:12px;font-weight:800}
+.forge-ai-beta button:disabled{opacity:.5;cursor:not-allowed}
+.forge-ai-beta .forge-ai-error{background:#612e40;border:1px solid #e0889f;border-radius:8px;padding:9px;color:#ffe1e8;font-size:11px}

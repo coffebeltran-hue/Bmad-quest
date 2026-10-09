@@ -24,6 +24,8 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+        env:
+          VITE_FORGE_API_URL: ${{ vars.FORGE_API_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
