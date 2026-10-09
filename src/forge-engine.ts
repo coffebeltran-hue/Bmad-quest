@@ -1,5 +1,5 @@
-import {planUniversal} from './universal-engine';
-import type {UniversalBlueprint} from './universal-engine';
+import {planUniversal} from './universal-engine.ts';
+import type {UniversalBlueprint} from './universal-engine.ts';
 export type ForgeKind = 'blackjack'|'quiz'|'tasks'|'booking'|'shop'|'tictactoe'|'custom';
 export type ForgeProject = {kind:ForgeKind;prompt:string;title:string;summary:string;mode:'prompt';blueprint?:UniversalBlueprint;source?:'local'|'ai'};
 export type ForgeResult = {project:ForgeProject|null;error:string};
