@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react';
 import{createRoot}from'react-dom/client';
 import './style.css';
 import StudioView from './Studio';
+import AcademyView from './AcademyView';
 import {agentProfiles} from './agent-profiles';
 import type {AgentName} from './agent-profiles';
 import ForgeApp from './ForgeApp';
@@ -219,27 +220,6 @@ function App(){
      return {...current,...funding,log:[...current.log,'Financiación de emergencia: +20 CR / -7 calidad ('+checkpoint+')']};
    });
  }
- const lexicon=[
-  ['Agentes','Roles especializados que ayudan a explorar, planificar, diseñar y construir.','Equipo'],
-  ['Skills y workflows','Capacidades y secuencias de trabajo para alcanzar un objetivo.','Fundamentos'],
-  ['Brainstorming','Generación y exploración de varias ideas antes de seleccionarlas.','Exploración'],
-  ['Forge Idea','Desafiar hipótesis para fortalecer una idea de producto.','Exploración'],
-  ['Deep Recon','Investigar profundamente un problema con evidencia.','Exploración'],
-  ['Product Brief','Resumen de problema, público y propuesta de valor.','Planificación'],
-  ['PRD','Documento de requisitos del producto y criterios verificables.','Planificación'],
-  ['MVP','Producto mínimo que permite validar una hipótesis.','Planificación'],
-  ['Epics y tickets','Divisiones del trabajo en unidades abordables.','Planificación'],
-  ['UX Design','Diseño enfocado en las tareas y necesidades humanas.','Diseño'],
-  ['Architecture','Decisiones estructurales y técnicas del software.','Desarrollo'],
-  ['QA y Code Review','Pruebas y revisión para detectar defectos y riesgos.','Desarrollo'],
-  ['Party Mode','Discusión entre distintas perspectivas de agentes, dirigida por una persona.','Colaboración'],
-  ['Advanced Elicitation','Preguntas para explorar supuestos y encontrar información faltante.','Colaboración'],
-  ['Correct Course','Revisión del plan cuando cambian las condiciones.','Colaboración'],
-  ['Retrospective','Reflexión sobre lo sucedido y acciones de mejora.','Aprendizaje'],
-  ['Project Context','Información compartida que mantiene decisiones y criterios coherentes.','Fundamentos'],
-  ['Customization','Personalización de capacidades o comportamientos del método.','Fundamentos']
- ];
- const filteredLexicon=lexicon.filter(([n,d,g])=>(n+d+g).toLowerCase().includes(term.toLowerCase()));
  return <div className="app-shell">
   <div className="cosmic-backdrop" aria-hidden="true"><i/><i/><i/><i/></div>
   <header className="site-header">
@@ -427,7 +407,7 @@ function App(){
       </div>
      </div>
    </div>}
-   {screen==='academy'&&<section className="screen-in academy-screen"><span className="section-kicker">✦ TU CENTRO DE CONOCIMIENTO</span><h1>Academia <em>BMAD.</em></h1><p>Desbloquea el lenguaje de los creadores. Aprende cada concepto a tu ritmo.</p><div className="academy-toolbar"><label className="search-box"><span>⌕</span><input value={term} onChange={e=>setTerm(e.target.value)} placeholder="Busca un concepto, skill o técnica…" aria-label="Buscar conceptos"/></label><span>{filteredLexicon.length} CONCEPTOS DISPONIBLES</span></div><div className="academy-grid">{filteredLexicon.map(([name,description,category],i)=><article className="academy-card" key={name}><div className="academy-card-top"><span className="academy-glyph">{['◈','✳','✦','◆','◎','✧'][i%6]}</span><span>{category.toUpperCase()}</span></div><h2>{name}</h2><p>{description}</p><span className="learn-tag">CONCEPTO BMAD ↗</span></article>)}</div><div className="academy-link"><span>¿Quieres ir más allá de la simulación?</span><a target="_blank" rel="noreferrer" href="https://docs.bmad-method.org/">Ver documentación oficial ↗</a></div></section>}
+   {screen==='academy'&&<AcademyView query={term} onQuery={setTerm}/>}
    {save&&screen==='report'&&<section className="screen-in report-screen"><div className="report-rays"/><div className="report-emblem">★</div><span className="section-kicker">✦ EL FINAL DE UNA AVENTURA</span><h1>{save.quality+save.insight>=125?'¡Startup legendaria!':save.quality+save.insight>=85?'¡Gran comienzo!':'¡Aprender también es ganar!'}</h1><p>Has completado {save.index} de 18 misiones. Cada elección te trajo hasta aquí.</p><div className="report-metrics"><div><span>◎</span><small>CRÉDITOS</small><b>{save.credits}</b></div><div><span>◆</span><small>CALIDAD</small><b>{save.quality}%</b></div><div><span>✦</span><small>BMAD XP</small><b>{save.insight}%</b></div><div><span>◈</span><small>DEBATES</small><b>{save.party.length}/8</b></div></div><div className="report-history"><h2>Diario de decisiones</h2><div>{save.log.map((entry,i)=><p key={i}><span>{String(i+1).padStart(2,'0')}</span>{entry}</p>)}</div></div><div className="report-actions"><button className="btn-ghost" onClick={()=>{const blob=new Blob([JSON.stringify(save,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bmad-quest-partida.json';a.click();URL.revokeObjectURL(url)}}>↓ Exportar progreso</button><button className="btn-main" onClick={()=>setShowNew(true)}>Nueva aventura ↗</button></div></section>}
   </main>
   <footer className="site-footer"><span><span className="footer-symbol">✦</span> BMAD QUEST <small>© 2026 · Experiencia educativa no oficial</small></span><a href="https://docs.bmad-method.org/" target="_blank" rel="noreferrer">Basado en BMAD Method ↗</a></footer>

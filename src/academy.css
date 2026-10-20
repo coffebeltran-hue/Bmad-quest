@@ -1,0 +1,74 @@
+/* BMAD Academy — installation wizard & actionable skill reference (v7 preview). */
+.academy-install-panel{margin:32px 0 52px;background:linear-gradient(150deg,#252d56,#141b3c);border:1px solid #6172a5;border-radius:24px;overflow:hidden;box-shadow:0 21px 52px #0004}
+.academy-install-heading{padding:28px 29px 21px;background:linear-gradient(105deg,#373775,#23556c);display:flex;justify-content:space-between;align-items:center;gap:20px}
+.academy-install-heading h2{font:800 clamp(24px,3vw,30px) 'Space Grotesk',sans-serif;margin:9px 0;color:#f6f7ff;letter-spacing:-.6px}
+.academy-install-heading p{font-size:12px;color:#ccd6ec;line-height:1.7;margin:0}
+.academy-install-kicker{font-size:10px;letter-spacing:1.3px;font-weight:800;color:#8ef9de}
+.academy-install-tag{font-size:9px;letter-spacing:1px;font-weight:800;color:#a0ffe9;border:1px solid #a1e9d169;padding:9px 12px;border-radius:99px;white-space:nowrap}
+.academy-terminal-select{display:flex;gap:7px;flex-wrap:wrap;padding:19px 25px 8px}
+.academy-terminal-select button{font-size:11px;font-weight:800;border-radius:9px;background:#1c284a;color:#bfc9e7;border:1px solid #52628e;padding:12px 14px}
+.academy-terminal-select button.active{border-color:#80f2dd;color:#eafff8;background:#27565e}
+.academy-version-select{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 25px}
+.academy-version-select button{min-width:0;display:flex;flex-direction:column;gap:5px;text-align:left;border:1px solid #5a6998;border-radius:13px;background:#182345;padding:15px 17px;color:#fff}
+.academy-version-select button.active{border-color:#93e9d8;background:#29495f;box-shadow:inset 0 0 0 1px #9affda45}
+.academy-version-select strong{font:800 13px 'Space Grotesk',sans-serif}
+.academy-version-select small{color:#a7bddb;font-size:10px}
+.academy-version-notice{margin:0 25px 14px;background:#413a58;border-left:3px solid #eac18c;border-radius:8px;padding:12px 14px;color:#f4dec2;font-size:11px;line-height:1.6}
+.academy-install-steps{margin:0 25px 20px;display:grid;gap:14px}
+.academy-step{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:17px;background:#182341;border:1px solid #45567d;border-radius:14px}
+.academy-step-n{display:grid;place-items:center;align-self:start;width:36px;height:36px;background:#464181;border:1px solid #8c81dd;border-radius:10px;font:800 13px 'Space Grotesk',sans-serif;color:#e9dcff}
+.academy-step h3{font:800 15px 'Space Grotesk',sans-serif;color:#f8f4ff;margin:4px 0 7px}
+.academy-step p{color:#bcc7e0;font-size:11px;line-height:1.7;margin:6px 0 13px}
+.academy-step p strong{color:#baffef}
+.academy-step p code{font:11px Consolas,monospace;color:#afffe5}
+.academy-step a{color:#a0f5e7;text-decoration:underline}
+.academy-code{background:#0b1630;border:1px solid #384971;border-radius:10px;margin:10px 0 0;position:relative;overflow:hidden}
+.academy-code-label{display:block;padding:9px 11px 8px;font-size:9px;font-weight:800;letter-spacing:.6px;color:#9badd3;border-bottom:1px solid #344269}
+.academy-code pre{padding:13px 90px 13px 12px;margin:0;overflow:auto;color:#b4ffe5;line-height:1.7;font:12px/1.7 Consolas,'Courier New',monospace;white-space:pre}
+.academy-code button{position:absolute;right:9px;top:8px;padding:7px 10px;background:#293d64;border:1px solid #617aad;color:#eaf9ff;border-radius:7px;font-size:10px;font-weight:800}
+.academy-code button:hover{border-color:#94f5e0}
+.academy-install-footer{padding:16px 25px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:#222849;border-top:1px solid #526089}
+.academy-install-footer span{max-width:700px;color:#b3c6e4;line-height:1.7;font-size:11px}
+.academy-install-footer a{font-size:12px;font-weight:800;white-space:nowrap;color:#a4f8e5}
+.academy-version-help{color:#ecd8b3!important}
+.academy-concepts-heading{margin-top:12px}
+.academy-concepts-heading h2{font:800 clamp(23px,3vw,30px) 'Space Grotesk',sans-serif;margin:10px 0;color:#f7f6ff}
+.academy-concepts-heading p{font-size:12px;color:#aab7d2;line-height:1.7;margin:7px 0 0}
+.academy-screen .academy-grid{align-items:stretch}
+.academy-screen .academy-card.academy-lesson{display:flex;flex-direction:column;min-width:0;padding:22px 20px;min-height:450px}
+.academy-lesson h2{margin:15px 0 7px!important}
+.academy-lesson .academy-lesson-summary{color:#d3ddf3;font-size:12px;line-height:1.65;margin:0 0 10px}
+.academy-lesson .academy-lesson-detail{font-size:11px;line-height:1.8;color:#a6b8d8;margin:0 0 16px}
+.academy-lesson-command{margin-top:auto}
+.academy-lesson-command>span{font-size:9px;color:#a6f0dd;font-weight:800;letter-spacing:.8px}
+.academy-lesson-command .academy-code{margin-top:7px}
+.academy-lesson-command .academy-code pre{font-size:11px;padding:12px 11px 12px;overflow-wrap:anywhere;white-space:pre-wrap}
+.academy-lesson-command .academy-code button{position:static;float:right;margin:0 8px 9px}
+.academy-alt-command{font-size:10px!important;color:#bbcde6!important;margin:9px 0 0!important}
+.academy-alt-command code{font:10px Consolas,monospace;color:#b0f5e6;overflow-wrap:anywhere}
+.academy-lesson-more{border-top:1px solid #506084;margin-top:17px;padding:13px 0 0}
+.academy-lesson-more summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center;color:#bbbcff;font-size:11px;font-weight:800}
+.academy-lesson-more summary::-webkit-details-marker{display:none}
+.academy-lesson-more[open] summary{color:#8bf5e0}
+.academy-lesson-more p{color:#d0d9ef;font-size:11px;line-height:1.7;margin:12px 0}
+.academy-lesson-output{padding:10px;border-radius:9px;background:#263f52;display:flex;flex-direction:column;gap:6px}
+.academy-lesson-output strong{font-size:9px;color:#93f1dd;letter-spacing:1px}
+.academy-lesson-output span{font-size:11px;line-height:1.6;color:#d9e6f6}
+.academy-no-results{background:#222849;padding:28px;border-radius:15px;margin:20px 0;border:1px solid #5a658c;color:#fff}
+.academy-no-results p{font-size:12px;color:#aab8d4}
+.academy-no-results button{background:#7adfc9;border:0;border-radius:8px;padding:9px 13px;color:#113942;font-weight:800}
+@media(max-width:900px){.academy-screen .academy-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){
+ .academy-install-heading{padding:20px 16px}.academy-install-tag{display:none}
+ .academy-terminal-select{padding:14px 12px 4px}.academy-terminal-select button{flex:1;font-size:10px;padding:9px 7px}
+ .academy-version-select{margin:10px 12px}.academy-version-notice{margin:0 12px 12px}
+ .academy-install-steps{margin:0 12px 12px}
+ .academy-step{grid-template-columns:1fr;gap:9px;padding:13px}
+ .academy-step-n{width:30px;height:30px}
+ .academy-code pre{font-size:11px;padding-right:10px;padding-top:46px}
+ .academy-code button{top:7px}
+ .academy-install-footer{padding:16px}
+ .academy-screen .academy-grid{grid-template-columns:1fr}
+ .academy-screen .academy-card.academy-lesson{min-height:0}
+ .academy-toolbar{flex-wrap:wrap}
+}

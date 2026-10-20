@@ -1,3 +1,7 @@
+## Academia: aprende e instala BMAD
+
+La Academia ahora incluye una guía paso a paso para CMD, PowerShell y Bash, con instalación de v7 preview o v6.12 estable, comandos copiables y fichas detalladas de los 18 conceptos. Consulta [docs/ACADEMY_BMAD_GUIDE.md](docs/ACADEMY_BMAD_GUIDE.md) para los comandos y fuentes oficiales.
+
 ## Acceso público controlado a IA
 
 Se incluye un modo invitado sin código beta, pero **solo se activa** con Redis, Turnstile y límites configurados en Vercel. Mientras falten esas protecciones, el acceso privado actual sigue funcionando. Consulta [docs/PUBLIC_AI_ACCESS.md](docs/PUBLIC_AI_ACCESS.md).
